@@ -1,0 +1,22 @@
+services:
+  # NestJS Backend - Production
+  app:
+    image: account/image-name:tag
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      # These should be provided via environment variables or secrets
+      - DATABASE_URL=${DATABASE_URL}
+      - DATABASE_CONNECTION_TYPE=${DATABASE_CONNECTION_TYPE}
+      - DATABASE_AUTH_TOKEN=${DATABASE_AUTH_TOKEN}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "<http://localhost:3000/health>"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
