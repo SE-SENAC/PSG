@@ -6,6 +6,9 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
+  DefaultValuePipe,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { SubscriptionService } from './subscription.service';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
@@ -23,11 +26,15 @@ export class SubscriptionController {
   @ApiOperation({ summary: 'Criar uma nova inscrição' })
   @ApiResponse({ status: 201, description: 'Inscrição realizada com sucesso' })
   async create(
-    @Body() createSubscriptionDto: CreateSubscriptionDto, 
-    @Body('user_id') user_id: string, 
-    @Body('course_id') course_id: string
+    @Body() createSubscriptionDto: CreateSubscriptionDto,
+    @Body('user_id') user_id: string,
+    @Body('course_id') course_id: string,
   ): Promise<Subscription> {
-    return this.subscriptionService.create(user_id, course_id, createSubscriptionDto);
+    return this.subscriptionService.create(
+      user_id,
+      course_id,
+      createSubscriptionDto,
+    );
   }
 
   @Post('confirm/:id')
@@ -39,10 +46,14 @@ export class SubscriptionController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Listar todas as inscrições' })
-  @ApiResponse({ status: 200, description: 'Lista de inscrições retornada' })
-  async findAll(): Promise<Subscription[]> {
-    return this.subscriptionService.findAll();
+  @ApiOperation({ summary: 'Listar todas as inscrições com paginação e busca' })
+  async findAll(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number = 10,
+    @Query('search') search?: string,
+  ) {
+    limit = limit > 100 ? 100 : limit;
+    return this.subscriptionService.findAll({ page, limit, route: '/subscription' }, search);
   }
 
   @Get(':id')

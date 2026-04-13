@@ -29,23 +29,30 @@ import { AuthResponse, RegisterResponse, JwtPayload } from './auth.types';
 export class AuthService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
-    @InjectRepository(Address) private readonly addressRepository: Repository<Address>,
-    @InjectRepository(Phone) private readonly phoneRepository: Repository<Phone>,
-    @InjectRepository(Student) private readonly studentRepository: Repository<Student>,
-    @InjectRepository(TypeUser) private readonly typeUserRepository: Repository<TypeUser>,
+    @InjectRepository(Address)
+    private readonly addressRepository: Repository<Address>,
+    @InjectRepository(Phone)
+    private readonly phoneRepository: Repository<Phone>,
+    @InjectRepository(Student)
+    private readonly studentRepository: Repository<Student>,
+    @InjectRepository(TypeUser)
+    private readonly typeUserRepository: Repository<TypeUser>,
     private readonly jwtService: AuthJwtService,
     private readonly mailerService: MailerService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
-  ) { }
+  ) {}
 
   /**
    * Generic login method used across different roles
    */
-  async login(loginDto: LoginDto, allowedRole: ROLE | ROLE[] = ROLE.CLIENT): Promise<AuthResponse> {
+  async login(
+    loginDto: LoginDto,
+    allowedRole: ROLE | ROLE[] = ROLE.CLIENT,
+  ): Promise<AuthResponse> {
     const user = await this.validateUser(loginDto.email, loginDto.password);
 
     const roles = Array.isArray(allowedRole) ? allowedRole : [allowedRole];
-    if (!user.typeUser || !roles.includes(user.typeUser.role as ROLE)) {
+    if (!user.typeUser || !roles.includes(user.typeUser.role)) {
       throw new UnauthorizedException('Você não tem permissão para esta ação');
     }
 
@@ -53,8 +60,8 @@ export class AuthService {
   }
 
   async loginAdmin(loginDto: LoginDto): Promise<AuthResponse> {
-    // Allow both ADMIN and SUPERADMIN to use admin portal
-    return this.login(loginDto, [ROLE.ADMIN, ROLE.SUPERADMIN]);
+    // Only ADMIN users can use the admin portal
+    return this.login(loginDto, ROLE.ADMIN);
   }
 
   async loginSuperAdmin(loginDto: LoginDto): Promise<AuthResponse> {
@@ -78,7 +85,7 @@ export class AuthService {
     const payload: JwtPayload = {
       id: user.id,
       email: user.email,
-      role: user.typeUser?.role as ROLE,
+      role: user.typeUser?.role,
     };
 
     const [accessToken, refreshToken] = await Promise.all([
@@ -94,12 +101,15 @@ export class AuthService {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.typeUser?.role as ROLE,
+        role: user.typeUser?.role,
       },
     };
   }
 
-  async register(registerDto: RegisterDto, role: ROLE = ROLE.CLIENT): Promise<RegisterResponse> {
+  async register(
+    registerDto: RegisterDto,
+    role: ROLE = ROLE.CLIENT,
+  ): Promise<RegisterResponse> {
     await this.checkExistingUser(registerDto.email, registerDto.cpf);
 
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
@@ -127,7 +137,7 @@ export class AuthService {
         id: savedUser.id,
         name: savedUser.name,
         email: savedUser.email,
-        role: typeUser.role as ROLE,
+        role: typeUser.role,
       },
     };
   }
@@ -137,12 +147,16 @@ export class AuthService {
   }
 
   private async checkExistingUser(email: string, cpf: string): Promise<void> {
-    const existingUser = await this.userRepository.findOne({ where: { email } });
+    const existingUser = await this.userRepository.findOne({
+      where: { email },
+    });
     if (existingUser) {
       throw new BadRequestException('E-mail já está em uso');
     }
 
-    const existingStudent = await this.studentRepository.findOne({ where: { cpf } });
+    const existingStudent = await this.studentRepository.findOne({
+      where: { cpf },
+    });
     if (existingStudent) {
       throw new BadRequestException('CPF já cadastrado');
     }
@@ -194,7 +208,7 @@ export class AuthService {
       { id: user.id },
       { expiresIn: '15m' },
     );
-    const resetLink = `${process.env.FRONTEND_URL}/auth/reset-password?token=${resetToken}`;
+    const resetLink = `${process.env.FRONTEND_URL}/autenticacao/redefinir-senha?token=${resetToken}`;
 
     const { html, text } = await renderResetPasswordEmail(user.name, resetLink);
 
@@ -211,7 +225,9 @@ export class AuthService {
   async resetPassword(token: string, newPassword: string) {
     try {
       const payload = await this.jwtService.verify(token);
-      const user = await this.userRepository.findOne({ where: { id: payload.id } });
+      const user = await this.userRepository.findOne({
+        where: { id: payload.id },
+      });
 
       if (!user) {
         throw new BadRequestException('Usuário não encontrado');
@@ -286,5 +302,3 @@ export class AuthService {
     return adminWithoutPassword;
   }
 }
-
-

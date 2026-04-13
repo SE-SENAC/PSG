@@ -9,7 +9,9 @@ import {
   Query,
   DefaultValuePipe,
   ParseIntPipe,
+  UseInterceptors,
 } from '@nestjs/common';
+import { CompressedCacheInterceptor } from '../common/interceptors/compressed-cache.interceptor';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -23,6 +25,7 @@ import {
 
 @ApiTags('categorias')
 @Controller('category')
+@UseInterceptors(CompressedCacheInterceptor)
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 

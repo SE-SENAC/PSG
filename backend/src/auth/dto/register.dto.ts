@@ -8,8 +8,8 @@ import {
   ValidateNested,
   IsOptional,
 } from 'class-validator';
-import { Gender } from 'src/commons/gender';
-import { IS_PCD, PCD_TYPE } from 'src/commons/pcd';
+import { Gender } from 'src/common/enums/gender';
+import { IS_PCD, PCD_TYPE } from 'src/common/enums/pcd';
 import { CreateAddressDto } from 'src/address/dto/create-address.dto';
 import { CreatePhoneDto } from 'src/phone/dto/create-phone.dto';
 import { Type } from 'class-transformer';

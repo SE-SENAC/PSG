@@ -28,7 +28,7 @@ export class AdminService {
     private readonly studentRepository: Repository<Student>,
     @InjectRepository(TypeUser)
     private readonly typeUserRepository: Repository<TypeUser>,
-  ) { }
+  ) {}
 
   findAll() {
     return this.adminRepository.find();
@@ -45,14 +45,18 @@ export class AdminService {
   async createAdminFromScratch(data: any) {
     const { name, email, password } = data;
 
-    const existingUser = await this.userRepository.findOne({ where: { email } });
+    const existingUser = await this.userRepository.findOne({
+      where: { email },
+    });
     if (existingUser) {
       throw new Error('Email já está em uso');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    let typeUser = await this.typeUserRepository.findOne({ where: { role: ROLE.ADMIN } });
+    let typeUser = await this.typeUserRepository.findOne({
+      where: { role: ROLE.ADMIN },
+    });
     if (!typeUser) {
       typeUser = await this.typeUserRepository.save({ role: ROLE.ADMIN });
     }

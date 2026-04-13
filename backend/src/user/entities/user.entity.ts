@@ -41,16 +41,22 @@ export class User {
   @OneToOne(() => Student, (student) => student.user, { cascade: true })
   student: Student;
 
-  @OneToOne(() => SuperAdmin, (superAdmin) => superAdmin.user, { cascade: true })
+  @OneToOne(() => SuperAdmin, (superAdmin) => superAdmin.user, {
+    cascade: true,
+  })
   superAdmin: SuperAdmin;
 
   @OneToOne(() => Admin, (admin) => admin.user, { cascade: true })
   admin: Admin;
 
-  @OneToOne(() => Subscription, (subscription) => subscription.user, { cascade: true })
+  @OneToOne(() => Subscription, (subscription) => subscription.user, {
+    cascade: true,
+  })
   subscription: Subscription;
 
-  @ManyToOne(() => TypeUser, (typeUser) => typeUser.users, { onDelete: 'CASCADE' })
+  @ManyToOne(() => TypeUser, (typeUser) => typeUser.users, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'typeUserId' })
   typeUser: TypeUser;
 }

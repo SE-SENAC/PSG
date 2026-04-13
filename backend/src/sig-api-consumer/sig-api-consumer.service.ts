@@ -26,7 +26,7 @@ export class SigApiConsumerService {
   }
 
   async get_cpf(cpf: string) {
-    let response = await axios.get(`https://www.google.com/api/pessoa`);
+    const response = await axios.get(`https://www.google.com/api/pessoa`);
     return response.data;
   }
 }

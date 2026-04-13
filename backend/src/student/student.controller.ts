@@ -36,7 +36,7 @@ export class StudentController {
   @ApiParam({ name: 'id', description: 'ID do estudante' })
   @ApiResponse({ status: 200, description: 'Detalhes do estudante retornados' })
   findOne(@Param('id') id: string) {
-    return this.studentService.findOne( id);
+    return this.studentService.findOne(id);
   }
 
   @Patch(':id')

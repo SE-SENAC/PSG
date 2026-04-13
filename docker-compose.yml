@@ -1,0 +1,75 @@
+services:
+  database:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=SenacDRSE@2026
+      - MSSQL_PID=Developer
+    ports:
+      - "1434:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql
+    healthcheck:
+      test: [ "CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S host.docker.internal -U leon.trindade -P 'SenacDRSE@2026' -Q 'IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = ''PSG'') CREATE DATABASE PSG' -C && /opt/mssql-tools18/bin/sqlcmd -S host.docker.internal -U leon.trindade -P 'SenacDRSE@2026' -d PSG -Q 'SELECT 1' -C" ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 25s
+
+  redis:
+    image: redis:alpine
+    command: redis-server --requirepass PSG@0000
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      - DB_HOST=host.docker.internal
+      - DB_PORT=1434
+      - DB_USERNAME=leon.trindade
+      - DB_PASSWORD=SenacDRSE@2026
+      - DATABASE_NAME=PSG
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=PSG@0000
+      - JWT_SECRET=PSG@0000
+      - PORT=3000
+      - CORS_ORIGINS=http://localhost,http://localhost:3000,http://localhost:3002,http://localhost:3003
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    ports:
+      - "3002:3000"
+
+  frontend:
+    build:
+      context: ./frontend/psg-frontend
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://backend:3000
+    depends_on:
+      - backend
+    ports:
+      - "3003:3000"
+
+  nginx:
+    image: nginx:alpine
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
+      - backend
+
+volumes:
+  mssql_data:
+  redis_data:

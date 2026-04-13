@@ -1,10 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseInterceptors,
+} from '@nestjs/common';
+import { CompressedCacheInterceptor } from '../common/interceptors/compressed-cache.interceptor';
 import { SigApiConsumerService } from './sig-api-consumer.service';
 import { CreateSigApiConsumerDto } from './dto/create-sig-api-consumer.dto';
 import { UpdateSigApiConsumerDto } from './dto/update-sig-api-consumer.dto';
-import axios from "axios";
+import axios from 'axios';
 
 @Controller('sig-api-consumer')
+@UseInterceptors(CompressedCacheInterceptor)
 export class SigApiConsumerController {
   constructor(private readonly sigApiConsumerService: SigApiConsumerService) {}
 
@@ -24,7 +35,10 @@ export class SigApiConsumerController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSigApiConsumerDto: UpdateSigApiConsumerDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateSigApiConsumerDto: UpdateSigApiConsumerDto,
+  ) {
     return this.sigApiConsumerService.update(+id, updateSigApiConsumerDto);
   }
 

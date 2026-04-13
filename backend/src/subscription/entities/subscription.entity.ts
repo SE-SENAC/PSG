@@ -25,7 +25,9 @@ export class Subscription {
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @ManyToOne(() => Course, (course) => course.subscriptions, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Course, (course) => course.subscriptions, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'courseId' })
   course: Course;
 

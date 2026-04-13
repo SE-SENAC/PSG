@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "@/lib/api";
 
 export interface CountryDdi {
     name: string;
@@ -9,7 +9,7 @@ export interface CountryDdi {
 export class PhoneServices {
     async getAllDdis(): Promise<CountryDdi[]> {
         try {
-            const response = await axios.get("https://restcountries.com/v3.1/all?fields=name,idd,flags");
+            const response = await api.get("https://restcountries.com/v3.1/all?fields=name,idd,flags");
             const countries = response.data
                 .filter((c: any) => c.idd && c.idd.root)
                 .flatMap((c: any) => {
@@ -31,3 +31,8 @@ export class PhoneServices {
         }
     }
 }
+
+
+
+
+

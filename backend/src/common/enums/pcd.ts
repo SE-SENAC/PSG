@@ -1,0 +1,14 @@
+export enum IS_PCD {
+  YES = 'YES',
+  NO = 'NO',
+}
+
+export enum PCD_TYPE {
+  FISICA = 'FISICA',
+  AUDITIVA = 'AUDITIVA',
+  VISUAL = 'VISUAL',
+  INTELECTUAL = 'INTELECTUAL',
+  MULTIPLA = 'MULTIPLA',
+  OUTRA = 'OUTRA',
+  NENHUMA = 'NENHUMA',
+}

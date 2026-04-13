@@ -32,7 +32,11 @@ export class AuthController {
 
   @Post('login-super-admin')
   @ApiOperation({ summary: 'Autenticação de super admin' })
-  @ApiResponse({ status: 200, description: 'Login bem-sucedido.', type: Object }) // Replace Object with actual type if needed by Swagger
+  @ApiResponse({
+    status: 200,
+    description: 'Login bem-sucedido.',
+    type: Object,
+  }) // Replace Object with actual type if needed by Swagger
   @ApiResponse({ status: 401, description: 'Credenciais inválidas.' })
   async loginSuperAdmin(@Body() loginDto: LoginDto): Promise<AuthResponse> {
     return this.authService.loginSuperAdmin(loginDto);
@@ -40,9 +44,17 @@ export class AuthController {
 
   @Post('register-admin')
   @ApiOperation({ summary: 'Registro de novo administrador' })
-  @ApiResponse({ status: 201, description: 'Administrador registrado com sucesso.' })
-  @ApiResponse({ status: 400, description: 'Dados inválidos ou e-mail já em uso.' })
-  async registerAdmin(@Body() registerDto: RegisterDto): Promise<RegisterResponse> {
+  @ApiResponse({
+    status: 201,
+    description: 'Administrador registrado com sucesso.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Dados inválidos ou e-mail já em uso.',
+  })
+  async registerAdmin(
+    @Body() registerDto: RegisterDto,
+  ): Promise<RegisterResponse> {
     return this.authService.registerAdmin(registerDto);
   }
 
@@ -66,7 +78,10 @@ export class AuthController {
   @Post('register')
   @ApiOperation({ summary: 'Registro de novo usuário' })
   @ApiResponse({ status: 201, description: 'Usuário registrado com sucesso.' })
-  @ApiResponse({ status: 400, description: 'Dados inválidos ou e-mail já em uso.' })
+  @ApiResponse({
+    status: 400,
+    description: 'Dados inválidos ou e-mail já em uso.',
+  })
   async register(@Body() registerDto: RegisterDto): Promise<RegisterResponse> {
     return this.authService.register(registerDto);
   }

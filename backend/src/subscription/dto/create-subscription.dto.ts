@@ -9,10 +9,9 @@ export class CreateSubscriptionDto {
 
   @ApiProperty({ description: 'ID do curso' })
   @IsString()
-  course_id : string;
+  course_id: string;
 
   @ApiProperty({ description: 'ID do estudante' })
   @IsString()
-  student_id : string;
-
+  student_id: string;
 }

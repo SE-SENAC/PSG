@@ -1,88 +1,84 @@
-import axios from "axios"
+import api from "@/lib/api";
 
-interface RegisterInterface{
+interface RegisterInterface { }
 
-}
-
-interface LoginInterface{
-    email : string;
-    password : string;
+interface LoginInterface {
+    email: string;
+    password: string;
 }
 
 interface ForgetPasswordInterface {
-    email : string;
+    email: string;
 }
 
-interface ProfileInterface {
-    id : number;
-    name : string;
-    email : string;
-    token?: string;
-    userExists?: any;
-}
-
-export default class AuthServices{
-
-    static async login(data : LoginInterface) : Promise<any>{
-        try{
-            let response = await axios.post("http://192.168.1.116:3001/api/auth/login",data);
+export default class AuthServices {
+    static async login(data: LoginInterface): Promise<any> {
+        try {
+            let response = await api.post("auth/login", data);
             if (response.data.token) {
-                localStorage.setItem("token",response.data.token);
+                localStorage.setItem("token", response.data.token);
             }
-            return response.data
-        }catch(e){
+            return response.data;
+        } catch (e) {
             throw e;
         }
     }
 
-    static async loginAdmin(data : LoginInterface) : Promise<any>{
-        try{
-            let response = await axios.post("http://192.168.1.116:3001/api/auth/login-admin",data);
-             if (response.data.token) {
-                localStorage.setItem("token",response.data.token);
+    static async loginAdmin(data: LoginInterface): Promise<any> {
+        try {
+            let response = await api.post("auth/login-admin", data);
+            if (response.data.token) {
+                localStorage.setItem("token", response.data.token);
             }
-            return response.data
-        }catch(e){
+            return response.data;
+        } catch (e) {
             throw e;
         }
     }
 
-    static async forgetPassword(data : ForgetPasswordInterface){
-        try{
-            let response = await axios.post("http://192.168.1.116:3001/api/auth/send-reset-password-link",data);
+    static async loginSuperAdmin(data: LoginInterface): Promise<any> {
+        try {
+            let response = await api.post("auth/login-super-admin", data);
+            if (response.data.token) {
+                localStorage.setItem("token", response.data.token);
+            }
             return response.data;
-        }catch(e){
+        } catch (e) {
+            throw e;
+        }
+    }
+    static async forgetPassword(data: ForgetPasswordInterface) {
+        try {
+            let response = await api.post("auth/send-reset-password-link", data);
+            return response.data;
+        } catch (e) {
             throw e;
         }
     }
 
-    static async register(data : any){
-        try{
-            let response = await axios.post("http://192.168.1.116:3001/api/auth/register",data)
+    static async register(data: any) {
+        try {
+            let response = await api.post("auth/register", data);
             return response.data;
-        }catch(e){
+        } catch (e) {
             throw e;
         }
     }
 
-    static async profile(id: string){
-        try{
-            let response = await axios.get(`http://192.168.1.116:3001/api/auth/profile/${id}`,{
-                headers : { Authorization : `Bearer ${localStorage.getItem("token")}`},
-            })
+    static async profile(id: string) {
+        try {
+            let response = await api.get(`auth/profile/${id}`);
             return response.data;
-        }catch(e){
+        } catch (e) {
             throw e;
         }
     }
 
-    static async getMe(){
-        try{
-            let response = await axios.get(`http://192.168.1.116:3001/api/auth/me`,{
-                headers : { Authorization : `Bearer ${localStorage.getItem("token")}`},
-            })
+    static async getMe() {
+        try {
+            let response = await api.get(`auth/me`);
             return response.data;
-        }catch(e){
+        } catch (e) {
             throw e;
         }
     }
@@ -91,9 +87,7 @@ export default class AuthServices{
     static async isAuthenticated(token: string) {
         if (!token) return false;
         try {
-            let response = await axios.post("http://192.168.1.116:3001/api/auth/verify", { token: token }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            let response = await api.post("auth/verify", { token: token });
             return response.data;
         } catch (e) {
             localStorage.removeItem("token");
@@ -103,24 +97,32 @@ export default class AuthServices{
 
     static async logout(token: string) {
         try {
-            let response = await axios.post("http://192.168.1.116:3001/api/auth/logout", {}, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            let response = await api.post("auth/logout", {});
             return response.data;
         } catch (e) {
             throw e;
         }
     }
 
-    static async getAdmin(id : string){
-        try{
-            let response = await axios.get(`http://192.168.1.116:3001/api/auth/admin/${id}`,{
-                headers : { Authorization : `Bearer ${localStorage.getItem("token")}`},
-            })
+    static async getAdmin(id: string) {
+        try {
+            let response = await api.get(`auth/admin/${id}`);
             return response.data;
-        }catch(e){
+        } catch (e) {
             throw e;
         }
     }
-
+    static async resetPassword(token: string, newPassword: string) {
+        try {
+            let response = await api.post("auth/password-reset", { token, newPassword });
+            return response.data;
+        } catch (e) {
+            throw e;
+        }
+    }
 }
+
+
+
+
+

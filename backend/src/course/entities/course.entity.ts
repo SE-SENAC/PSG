@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { statusEnum } from '../enum/course-enum';
 import { PERIOD_DAY } from '../enum/period_day';
+import { COURSE_TYPE } from '../enum/course-type';
 import { Category } from 'src/category/entities/category.entity';
 import { JoinColumn } from 'typeorm';
 
@@ -22,14 +23,20 @@ export class Course {
   @Column()
   status_vacancy: statusEnum;
 
+  @Column({ type: 'nvarchar', length: 20, default: COURSE_TYPE.LIVRE })
+  type: COURSE_TYPE;
+
   @Column()
   title: string;
 
-  @Column()
+  @Column({ type: 'nvarchar', length: 20 })
   period_day: PERIOD_DAY;
 
   @Column()
   address: string;
+
+  @Column({ nullable: true })
+  municipality: string;
 
   @Column()
   targetAudience: string;
@@ -79,10 +86,17 @@ export class Course {
   @Column()
   updatedAt: Date;
 
-  @OneToMany(() => Subscription, (subscription) => subscription.course, { cascade: true })
+  @OneToMany(() => Subscription, (subscription) => subscription.course, {
+    cascade: true,
+  })
   subscriptions: Subscription[];
 
-  @ManyToOne(() => Category, (category) => category.courses, { onDelete: 'CASCADE' })
+  @Column({ name: 'categoryId', nullable: true })
+  categoryId: string;
+
+  @ManyToOne(() => Category, (category) => category.courses, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'categoryId' })
   category: Category;
 }

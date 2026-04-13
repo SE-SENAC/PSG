@@ -1,4 +1,4 @@
-import { ROLE } from "src/type-user/enum/enum";
+import { ROLE } from 'src/type-user/enum/enum';
 
 export interface AuthResponse {
   message: string;

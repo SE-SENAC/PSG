@@ -17,7 +17,7 @@ export class Result {
   @Column()
   title: string;
 
-  @Column()
+  @Column({ type: 'nvarchar', length: 'max', nullable: true })
   file_path: string;
 
   @CreateDateColumn({ type: 'date' })

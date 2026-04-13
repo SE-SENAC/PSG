@@ -1,5 +1,5 @@
 export enum PERIOD_DAY {
-  'MANHÃ',
-  'TARDE',
-  'NOITE',
+  'MANHÃ' = 'MANHÃ',
+  'TARDE' = 'TARDE',
+  'NOITE' = 'NOITE',
 }

@@ -6,9 +6,9 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { IS_PCD } from 'src/commons/pcd';
-import { PCD_TYPE } from 'src/commons/pcd';
-import { Gender } from 'src/commons/gender';
+import { IS_PCD } from 'src/common/enums/pcd';
+import { PCD_TYPE } from 'src/common/enums/pcd';
+import { Gender } from 'src/common/enums/gender';
 import { EDUCATION_LEVEL } from '../enum/education_level';
 
 @Entity()

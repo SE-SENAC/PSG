@@ -21,10 +21,18 @@ export class EditalService {
     return await this.editalRepository.save(createEditalDto);
   }
 
-  async findAll(option: IPaginationOptions): Promise<Pagination<Edital>> {
-    return await paginate<Edital>(this.editalRepository, option, {
-      order: { title: 'ASC' },
-    });
+  async findAll(option: IPaginationOptions, search?: string): Promise<Pagination<Edital>> {
+    const queryBuilder = this.editalRepository.createQueryBuilder('edital');
+    
+    if (search) {
+      queryBuilder.where('edital.title LIKE :search', { 
+        search: `%${search}%` 
+      });
+    }
+    
+    queryBuilder.orderBy('edital.title', 'ASC');
+    
+    return await paginate<Edital>(queryBuilder, option);
   }
 
   async findOne(id: string) {

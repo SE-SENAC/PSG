@@ -15,8 +15,10 @@ export const AppDataSource = new DataSource({
 
 AppDataSource.initialize()
   .then(() => {
-    console.log('Data Source has been initialized!');
+    // Log de sucesso na inicialização do banco de dados
+    console.log('Fonte de dados inicializada com sucesso!');
   })
   .catch((err) => {
-    console.error('Error during Data Source initialization', err);
+    // Log de erro no caso de falha na conexão ou inicialização
+    console.error('Erro durante a inicialização da fonte de dados:', err);
   });

@@ -28,21 +28,29 @@ import { SigApiConsumerModule } from './sig-api-consumer/sig-api-consumer.module
 import { SigApiConsumerService } from './sig-api-consumer/sig-api-consumer.service';
 import { AdminSeed } from '../seed';
 import { LogActivityModule } from './log-activity/log-activity.module';
+import { DiretrizesModule } from './documents/diretrizes/diretrizes.module';
+import { SuperAdminSeed } from '../seed';
+import { LogActivityMiddleware } from './log-activity/log-activity.middleware';
 
 @Module({
   imports: [
+    // Configuração do Cache utilizando Redis
     CacheModule.registerAsync({
       isGlobal: true,
       useFactory: async () => ({
-        store: await redisStore,
-        host: process.env.REDIS_HOST,
-        port: process.env.REDIS_PORT,
+        store: redisStore,
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT || '6379'),
         password: process.env.REDIS_PASSWORD,
+        ttl: 600, // 10 minutos de cache por padrão para economizar processamento do BD
+        max: 1000, // Máximo de itens em cache
       }),
     }),
+    // Configuração das variáveis de ambiente
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    // Configuração do serviço de email
     MailerModule.forRoot({
       transport: {
         host: 'smtp.gmail.com',
@@ -54,10 +62,11 @@ import { LogActivityModule } from './log-activity/log-activity.module';
         },
       },
     }),
+    // Configuração do Banco de Dados (SQL Server / MSSQL)
     TypeOrmModule.forRoot({
       type: 'mssql',
-      host: 'localhost',
-      port: 1433,
+      host: process.env.DB_HOST ?? '127.0.0.1',
+      port: parseInt(process.env.DB_PORT || '1433'),
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DATABASE_NAME,
@@ -65,14 +74,24 @@ import { LogActivityModule } from './log-activity/log-activity.module';
       migrations: [__dirname + '/**/*.migration{.ts,.js}'],
       subscribers: [__dirname + '/**/*.subscriber{.ts,.js}'],
       autoLoadEntities: true,
-      synchronize: true,
+      synchronize: true, // Nota: Use apenas em desenvolvimento
+      connectionTimeout: 30000,
+      requestTimeout: 30000,
       extra: {
         options: {
           trustServerCertificate: true,
-          encrypt: true,
+          encrypt: false,
+          enableArithAbort: true,
+          cancelTimeout: 10000,
         },
       },
+      pool: {
+        max: 10,
+        min: 0,
+        idleTimeoutMillis: 30000,
+      },
     }),
+    // Importação dos módulos da aplicação
     HttpModule,
     EditalModule,
     ResultModule,
@@ -89,8 +108,19 @@ import { LogActivityModule } from './log-activity/log-activity.module';
     AuthModule,
     SigApiConsumerModule,
     LogActivityModule,
+    DiretrizesModule,
   ],
   controllers: [AppController],
-  providers: [AppService, CourseSeed, EditalSeed, ResultSeed, CategorySeed, AdminSeed, SigApiConsumerService],
+  providers: [
+    AppService,
+    // Seeders para carregamento inicial de dados
+    CourseSeed,
+    EditalSeed,
+    ResultSeed,
+    CategorySeed,
+    AdminSeed,
+    SuperAdminSeed,
+    SigApiConsumerService,
+  ],
 })
 export class AppModule {}

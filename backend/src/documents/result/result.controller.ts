@@ -41,9 +41,10 @@ export class ResultController {
   index(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number = 10,
+    @Query('search') search?: string,
   ) {
     limit = limit > 100 ? 100 : limit;
-    return this.resultService.findAll({ page, limit, route: '/result' });
+    return this.resultService.findAll({ page, limit, route: '/result' }, search);
   }
 
   @Get(':id')

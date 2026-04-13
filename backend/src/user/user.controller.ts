@@ -24,7 +24,7 @@ import {
 @ApiTags('usuarios')
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
   @Post()
   @ApiOperation({ summary: 'Criar um novo usuário' })

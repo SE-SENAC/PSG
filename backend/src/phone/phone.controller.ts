@@ -15,7 +15,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 @ApiTags('telefones')
 @Controller('phone')
 export class PhoneController {
-  constructor(private readonly phoneService: PhoneService) { }
+  constructor(private readonly phoneService: PhoneService) {}
 
   @Post()
   @ApiOperation({ summary: 'Criar um novo telefone' })

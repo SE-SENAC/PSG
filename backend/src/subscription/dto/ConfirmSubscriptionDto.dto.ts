@@ -1,3 +1,3 @@
 export class ConfirmSubscriptionDto {
-    id: number;
+  id: number;
 }

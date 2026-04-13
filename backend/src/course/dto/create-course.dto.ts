@@ -7,9 +7,14 @@ import {
 } from 'class-validator';
 import { statusEnum } from '../enum/course-enum';
 import { PERIOD_DAY } from '../enum/period_day';
+import { COURSE_TYPE } from '../enum/course-type';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCourseDto {
+  @ApiProperty({ description: 'Tipo do curso', enum: COURSE_TYPE })
+  @IsEnum(COURSE_TYPE)
+  type: COURSE_TYPE;
+
   @ApiProperty({ description: 'URL da imagem do curso' })
   @IsString()
   img_url: string;
@@ -25,6 +30,15 @@ export class CreateCourseDto {
   @ApiProperty({ description: 'Endereço do curso' })
   @IsString()
   address: string;
+
+  @ApiProperty({ description: 'Telefones e outros campos podem ser adicionados' })
+  @IsOptional()
+  @IsString()
+  municipality: string;
+
+  @ApiProperty({ description: 'ID da categoria do curso' })
+  @IsString()
+  categoryId: string;
 
   @ApiProperty({ description: 'Público alvo' })
   @IsString()

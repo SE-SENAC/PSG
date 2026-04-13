@@ -10,7 +10,9 @@ import { Phone } from 'src/phone/entities/phone.entity';
 import { Student } from 'src/student/entities/student.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Admin, User, Student, TypeUser,Address,Phone])],
+  imports: [
+    TypeOrmModule.forFeature([Admin, User, Student, TypeUser, Address, Phone]),
+  ],
   controllers: [AdminController],
   providers: [AdminService],
   exports: [AdminService],
