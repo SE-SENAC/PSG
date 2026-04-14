@@ -110,7 +110,7 @@ export default function NoticesPage() {
                     <Button 
                         variant="outline" 
                         size="sm" 
-                        onClick={fetchNotices} 
+                        onClick={() => fetchNotices()} 
                         disabled={loading}
                         className="rounded-2xl border-slate-200 hover:bg-slate-50 gap-2 h-11 px-4"
                     >

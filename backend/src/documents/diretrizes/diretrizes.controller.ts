@@ -3,6 +3,8 @@ import {
   Get,
   Post,
   Body,
+  Patch,
+  Put,
   Param,
   Delete,
   Query,
@@ -11,7 +13,8 @@ import {
 } from '@nestjs/common';
 import { DiretrizesService } from './diretrizes.service';
 import { CreateDiretrizDto } from './dto/create-diretriz.dto';
-import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { UpdateDiretrizDto } from './dto/update-diretriz.dto';
+import { ApiTags, ApiOperation, ApiQuery, ApiParam, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('diretrizes')
 @Controller('diretrizes')
@@ -38,11 +41,22 @@ export class DiretrizesController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Obter uma diretriz específica' })
   findOne(@Param('id') id: string) {
     return this.diretrizesService.findOne(id);
   }
 
+  @Put(':id')
+  @Patch(':id')
+  @ApiOperation({ summary: 'Atualizar uma diretriz' })
+  @ApiParam({ name: 'id', description: 'ID da diretriz' })
+  @ApiResponse({ status: 200, description: 'Diretriz atualizada com sucesso' })
+  update(@Param('id') id: string, @Body() updateDiretrizDto: UpdateDiretrizDto) {
+    return this.diretrizesService.update(id, updateDiretrizDto);
+  }
+
   @Delete(':id')
+  @ApiOperation({ summary: 'Remover uma diretriz' })
   remove(@Param('id') id: string) {
     return this.diretrizesService.remove(id);
   }

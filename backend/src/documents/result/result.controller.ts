@@ -4,6 +4,7 @@ import {
   Post,
   Body,
   Patch,
+  Put,
   Param,
   Delete,
   Query,
@@ -55,6 +56,7 @@ export class ResultController {
     return this.resultService.findOne(id);
   }
 
+  @Put(':id')
   @Patch(':id')
   @ApiOperation({ summary: 'Atualizar um resultado' })
   @ApiParam({ name: 'id', description: 'ID do resultado' })

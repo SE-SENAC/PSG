@@ -12,8 +12,10 @@ import {
     Clock,
     XCircle,
     MoreVertical,
-    ClipboardCheck
+    ClipboardCheck,
+    Download
 } from 'lucide-react';
+import { pdf, Document, Page, View, Text, Image, StyleSheet } from '@react-pdf/renderer';
 import {
     Pagination,
     PaginationContent,
@@ -93,6 +95,169 @@ export default function SubscriptionsPage() {
         }
     };
 
+    const maskCpf = (cpf?: string) => {
+        if (!cpf) return 'CPF não informado';
+        const clean = cpf.replace(/\D/g, '');
+        if (clean.length !== 11) return cpf;
+        return `${clean.slice(0, 3)}.***.***-${clean.slice(9)}`;
+    };
+
+    const formatDateTime = (value?: string | Date) => {
+        if (!value) return '—';
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return '—';
+        return `${date.toLocaleDateString('pt-BR')} ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+    };
+
+    const fetchImageAsDataUrl = async (url: string) => {
+        try {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            return await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result as string);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+        } catch (error) {
+            return null;
+        }
+    };
+
+    const pdfStyles = StyleSheet.create({
+        page: {
+            padding: 28,
+            fontSize: 10,
+            fontFamily: 'Helvetica',
+            color: '#111827',
+        },
+        header: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: 14,
+        },
+        logo: {
+            width: 64,
+            height: 64,
+            marginRight: 12,
+        },
+        title: {
+            fontSize: 16,
+            fontWeight: 'bold',
+            color: '#004587',
+        },
+        subtitle: {
+            fontSize: 10,
+            marginTop: 4,
+            color: '#4b5563',
+        },
+        tableHeader: {
+            flexDirection: 'row',
+            borderBottomWidth: 1,
+            borderBottomColor: '#004587',
+            backgroundColor: '#004587',
+            color: '#ffffff',
+            paddingVertical: 6,
+            paddingHorizontal: 4,
+        },
+        tableRow: {
+            flexDirection: 'row',
+            borderBottomWidth: 0.5,
+            borderBottomColor: '#d1d5db',
+            paddingVertical: 6,
+            paddingHorizontal: 4,
+        },
+        tableRowAlternate: {
+            backgroundColor: '#f8fafc',
+        },
+        cell: {
+            flexGrow: 1,
+            flexBasis: 0,
+            paddingRight: 4,
+            fontSize: 9,
+        },
+        statusCell: {
+            width: 80,
+            fontSize: 9,
+        },
+        tableHeaderText: {
+            fontSize: 9,
+            fontWeight: 'bold',
+            color: '#ffffff',
+        },
+    });
+
+    const SubscriptionsPdfDocument = ({ items, logoDataUrl }: { items: any[]; logoDataUrl: string | null }) => (
+        <Document>
+            <Page size="A4" style={pdfStyles.page}>
+                <View style={pdfStyles.header}>
+                    {logoDataUrl ? <Image src={logoDataUrl} style={pdfStyles.logo} /> : null}
+                    <View>
+                        <Text style={pdfStyles.title}>Relatório de Inscrições - SENAC</Text>
+                        <Text style={pdfStyles.subtitle}>Pendentes e Matrículas Confirmadas</Text>
+                        <Text style={pdfStyles.subtitle}>{`Emitido em ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}`}</Text>
+                    </View>
+                </View>
+
+                <View style={pdfStyles.tableHeader}>
+                    <Text style={[pdfStyles.cell, pdfStyles.tableHeaderText]}>CPF</Text>
+                    <Text style={[pdfStyles.cell, pdfStyles.tableHeaderText]}>Nome</Text>
+                    <Text style={[pdfStyles.statusCell, pdfStyles.tableHeaderText]}>Status</Text>
+                    <Text style={[pdfStyles.cell, pdfStyles.tableHeaderText]}>Horário de inscrição</Text>
+                </View>
+
+                {items.map((item, idx) => (
+                    <View
+                        key={`${item.id}-${idx}`}
+                        style={[
+                            pdfStyles.tableRow,
+                            idx % 2 === 1 ? pdfStyles.tableRowAlternate : {},
+                        ]}
+                    >
+                        <Text style={pdfStyles.cell}>{maskCpf(item.user?.student?.cpf)}</Text>
+                        <Text style={pdfStyles.cell}>{item.user?.name || 'N/A'}</Text>
+                        <Text style={pdfStyles.statusCell}>{item.status || 'PENDENTE'}</Text>
+                        <Text style={pdfStyles.cell}>{formatDateTime(item.created_at || item.createdAt)}</Text>
+                    </View>
+                ))}
+            </Page>
+        </Document>
+    );
+
+    const exportSubscriptionsPdf = async () => {
+        if (subscriptions.length === 0) {
+            toast.error('Nenhuma inscrição para exportar.');
+            return;
+        }
+
+        try {
+            const logoUrl = 'https://fabianocage.com.br/senacse/wp-content/uploads/2026/02/logo-negativo-vertical.svg';
+            const logoDataUrl = await fetchImageAsDataUrl(logoUrl);
+
+            const filteredSubscriptions = subscriptions.filter((sub) =>
+                ['PENDENTE', 'EM_ANALISE', 'CONFIRMADO'].includes(sub.status),
+            );
+
+            const documentBlob = await pdf(
+                <SubscriptionsPdfDocument items={filteredSubscriptions} logoDataUrl={logoDataUrl} />,
+            ).toBlob();
+
+            const url = URL.createObjectURL(documentBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `relatorio-inscricoes-senac-${new Date().toISOString().slice(0, 10)}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+
+            toast.success('PDF gerado com sucesso.');
+        } catch (error) {
+            console.error('Erro ao gerar PDF:', error);
+            toast.error('Falha ao exportar o PDF.');
+        }
+    };
+
     const displaySubscriptions = subscriptions;
 
     const stats = {
@@ -109,16 +274,28 @@ export default function SubscriptionsPage() {
                     <p className="text-slate-500 font-medium italic">Monitore e valide as pretensões de matrícula dos candidatos.</p>
                 </div>
                 
-                <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={fetchSubscriptions} 
-                    disabled={loading}
-                    className="rounded-2xl border-slate-200 hover:bg-slate-50 gap-2 h-11 px-4 text-[#002d5b] font-bold"
-                >
-                    <RefreshCcw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
-                    Sincronizar Dados
-                </Button>
+                <div className="flex items-center gap-3">
+                    <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => exportSubscriptionsPdf()} 
+                        disabled={loading}
+                        className="rounded-2xl border-slate-200 hover:bg-slate-50 gap-2 h-11 px-4 text-[#002d5b] font-bold"
+                    >
+                        <Download className="size-4" />
+                        Exportar PDF
+                    </Button>
+                    <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => fetchSubscriptions()} 
+                        disabled={loading}
+                        className="rounded-2xl border-slate-200 hover:bg-slate-50 gap-2 h-11 px-4 text-[#002d5b] font-bold"
+                    >
+                        <RefreshCcw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
+                        Sincronizar Dados
+                    </Button>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -162,10 +339,10 @@ export default function SubscriptionsPage() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-white">
-                                <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b">Candidato</th>
-                                <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b">Curso Pretendido</th>
-                                <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b">Data Inscrição</th>
-                                <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b">Status Atual</th>
+                                <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b">CPF</th>
+                                <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b">Nome</th>
+                                <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b">Status</th>
+                                <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b">Horário de Inscrição</th>
                                 <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right border-b">Ações</th>
                             </tr>
                         </thead>
@@ -186,28 +363,11 @@ export default function SubscriptionsPage() {
                                     transition={{ delay: idx * 0.03 }}
                                     className="hover:bg-slate-50 transition-all group border-l-4 border-l-transparent hover:border-l-[#f58220]"
                                 >
-                                    <td className="px-8 py-6">
-                                        <div className="flex items-center gap-4">
-                                            <div className="size-10 rounded-[15px] bg-slate-100 flex items-center justify-center text-slate-400 transition-all duration-300">
-                                                <User className="size-5" />
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <span className="font-bold text-slate-900 leading-tight">{sub.user?.name || "N/A"}</span>
-                                                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">{sub.user?.cpf || 'CPF NÃO INFORMADO'}</span>
-                                            </div>
-                                        </div>
+                                    <td className="px-8 py-6 font-bold uppercase text-xs tracking-[0.12em] text-slate-700">
+                                        {maskCpf(sub.user?.student?.cpf)}
                                     </td>
                                     <td className="px-8 py-6">
-                                        <div className="flex flex-col">
-                                            <span className="font-bold text-slate-600 line-clamp-1">{sub.course?.title}</span>
-                                            <span className="text-[10px] text-slate-400 font-bold uppercase mt-1 italic">{sub.course?.municipality}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-8 py-6">
-                                        <div className="flex items-center gap-2 text-slate-500 font-bold text-xs uppercase">
-                                            <Calendar className="size-3 text-slate-300" />
-                                            {new Date(sub.created_at || sub.createdAt).toLocaleDateString('pt-BR')}
-                                        </div>
+                                        <span className="font-bold text-slate-900">{sub.user?.name || 'N/A'}</span>
                                     </td>
                                     <td className="px-8 py-6">
                                         <Badge className={`rounded-xl px-4 py-1.5 font-black text-[9px] uppercase tracking-[0.15em] border-none shadow-sm ${
@@ -217,6 +377,9 @@ export default function SubscriptionsPage() {
                                         }`}>
                                             {sub.status || 'PENDENTE'}
                                         </Badge>
+                                    </td>
+                                    <td className="px-8 py-6 text-slate-500 font-bold text-xs uppercase tracking-[0.12em]">
+                                        {formatDateTime(sub.created_at || sub.createdAt)}
                                     </td>
                                     <td className="px-8 py-6 text-right">
                                         <DropdownMenu>

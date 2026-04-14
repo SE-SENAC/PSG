@@ -38,14 +38,24 @@ export class AdminController {
     return this.adminService.findOne(id);
   }
 
-  @Post('create-scratch')
+  @Post()
   @ApiOperation({ summary: 'Criar um administrador do zero' })
   @ApiResponse({
     status: 201,
     description: 'Administrador criado com sucesso',
   })
-  createScratch(@Body() data: any) {
-    return this.adminService.createAdminFromScratch(data);
+  create(@Body() createAdminDto: CreateAdminDto) {
+    return this.adminService.createAdminFromScratch(createAdminDto);
+  }
+
+  @Post('create-scratch')
+  @ApiOperation({ summary: 'Criar um administrador do zero (compatibilidade)' })
+  @ApiResponse({
+    status: 201,
+    description: 'Administrador criado com sucesso',
+  })
+  createScratch(@Body() createAdminDto: CreateAdminDto) {
+    return this.adminService.createAdminFromScratch(createAdminDto);
   }
 
   @Post('find-by-email')

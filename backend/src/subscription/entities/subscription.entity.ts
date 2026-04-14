@@ -21,7 +21,7 @@ export class Subscription {
   @Column({ default: STATUS.PENDING })
   status: STATUS;
 
-  @OneToOne(() => User, (user) => user.subscription, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.subscriptions, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
 

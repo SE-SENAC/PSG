@@ -43,4 +43,14 @@ export class ConfigurationService {
     }
     return this.configurationRepository.save(config);
   }
+
+  async getEnrollmentRules() {
+    const maxCourses = await this.findByKey('psg_max_courses');
+    const allowSameShift = await this.findByKey('psg_allow_same_shift');
+    
+    return {
+      psg_max_courses: parseInt(maxCourses.value) || 2,
+      psg_allow_same_shift: allowSameShift.value === 'true'
+    };
+  }
 }

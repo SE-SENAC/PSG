@@ -4,6 +4,7 @@ import {
   Post,
   Body,
   Patch,
+  Put,
   Param,
   Delete,
   Query,
@@ -189,6 +190,7 @@ export class CourseController {
    * @param updateCourseDto Dados a serem atualizados.
    * @returns Resultado da atualização.
    */
+  @Put(':id')
   @Patch(':id')
   @ApiOperation({ summary: 'Atualizar dados de um curso' })
   @ApiParam({ name: 'id', description: 'ID do curso' })

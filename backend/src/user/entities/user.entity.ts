@@ -49,10 +49,10 @@ export class User {
   @OneToOne(() => Admin, (admin) => admin.user, { cascade: true })
   admin: Admin;
 
-  @OneToOne(() => Subscription, (subscription) => subscription.user, {
+  @OneToMany(() => Subscription, (subscription) => subscription.user, {
     cascade: true,
   })
-  subscription: Subscription;
+  subscriptions: Subscription[];
 
   @ManyToOne(() => TypeUser, (typeUser) => typeUser.users, {
     onDelete: 'CASCADE',

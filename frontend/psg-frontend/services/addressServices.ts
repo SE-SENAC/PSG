@@ -10,8 +10,8 @@ export interface AddressResponseViaCep {
     erro?: string | boolean;
 }
 
-export class AddressServices {
-    async getAddressByZipCode(zipCode: string): Promise<AddressResponseViaCep> {
+export default class AddressServices {
+    static async getAddressByZipCode(zipCode: string): Promise<AddressResponseViaCep> {
         try {
             const response = await api.get(`https://viacep.com.br/ws/${zipCode}/json/`);
             return response.data;
@@ -19,7 +19,17 @@ export class AddressServices {
             throw new Error("Erro ao buscar endereço");
         }
     }
+
+    static async getAll(): Promise<any> {
+        try {
+            const response = await api.get("address");
+            return response.data;
+        } catch (e) {
+            throw e;
+        }
+    }
 }
+
 
 
 

@@ -48,6 +48,7 @@ import { toast } from 'sonner';
 interface Course {
   id: string;
   title: string;
+  minAge: number;
 }
 
 export default function RegistrationPage({ params }: { params: Promise<{ id: string }> }) {
@@ -62,6 +63,11 @@ export default function RegistrationPage({ params }: { params: Promise<{ id: str
     privacy: { text: '', updatedAt: '' },
     cookie: { text: '', updatedAt: '' }
   });
+
+  const SALARIO_MINIMO = 1412.00;
+  const [isAgeErrorOpen, setIsAgeErrorOpen] = useState(false);
+  const [isIncomeErrorOpen, setIsIncomeErrorOpen] = useState(false);
+  const [rendaPerCapita, setRendaPerCapita] = useState(0);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState({
@@ -154,6 +160,55 @@ export default function RegistrationPage({ params }: { params: Promise<{ id: str
     fetchPolicies();
   }, [id]);
 
+  useEffect(() => {
+    const renda = parseFloat(formData.rendaFamiliar) || 0;
+    const pessoas = parseInt(formData.quantidadePessoas) || 1;
+    setRendaPerCapita(renda / (pessoas || 1));
+  }, [formData.rendaFamiliar, formData.quantidadePessoas]);
+
+  const applyCPFMask = (value: string) => {
+    return value
+      .replace(/\D/g, '')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d{1,2})/, '$1-$2')
+      .replace(/(-\d{2})\d+?$/, '$1');
+  };
+
+  const validateCPF = (cpf: string) => {
+    const cleanCpf = cpf.replace(/\D/g, '');
+    if (cleanCpf.length !== 11) return false;
+    if (/^(\d)\1+$/.test(cleanCpf)) return false;
+
+    let sum = 0;
+    let remainder;
+
+    for (let i = 1; i <= 9; i++) sum += parseInt(cleanCpf.substring(i - 1, i)) * (11 - i);
+    remainder = (sum * 10) % 11;
+    if (remainder === 10 || remainder === 11) remainder = 0;
+    if (remainder !== parseInt(cleanCpf.substring(9, 10))) return false;
+
+    sum = 0;
+    for (let i = 1; i <= 10; i++) sum += parseInt(cleanCpf.substring(i - 1, i)) * (12 - i);
+    remainder = (sum * 10) % 11;
+    if (remainder === 10 || remainder === 11) remainder = 0;
+    if (remainder !== parseInt(cleanCpf.substring(10, 11))) return false;
+
+    return true;
+  };
+
+  const calculateAge = (birthDate: string) => {
+    if (!birthDate) return 0;
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
   const handleAcceptCookie = (categories: string[]) => {
     localStorage.setItem('cookie_policy_accepted', new Date().toISOString());
     localStorage.setItem('cookie_categories', JSON.stringify(categories));
@@ -171,12 +226,27 @@ export default function RegistrationPage({ params }: { params: Promise<{ id: str
       toast.error('Por favor, preencha todos os campos obrigatórios');
       return false;
     }
-    // Simple CPF validation
+
+    // CPF validation
     const cleanCpf = formData.cpf.replace(/\D/g, '');
-    if (cleanCpf.length !== 11) {
-      toast.error('CPF inválido - deve conter 11 dígitos');
+    if (!validateCPF(cleanCpf)) {
+      toast.error('CPF inválido - Verifique os dígitos informados');
       return false;
     }
+
+    // Age validation
+    const userAge = calculateAge(formData.dataNascimento);
+    if (course && userAge < course.minAge) {
+      setIsAgeErrorOpen(true);
+      return false;
+    }
+
+    // Income validation
+    if (rendaPerCapita > (SALARIO_MINIMO * 2)) {
+      setIsIncomeErrorOpen(true);
+      return false;
+    }
+
     return true;
   };
 
@@ -196,20 +266,25 @@ export default function RegistrationPage({ params }: { params: Promise<{ id: str
   const handleConfirmRegistration = async () => {
     setLoading(true);
     try {
-      // Simulation of a backend call. 
-      // Replace with real registration logic when backend is ready for all fields.
-      console.log('Final Registration Submission:', {
-        ...formData,
+      // Real backend integration
+      const registrationData = {
+        name: formData.nome,
+        email: formData.email,
+        cpf: formData.cpf.replace(/\D/g, ''),
+        birth_date: formData.dataNascimento,
+        family_income: parseFloat(formData.rendaFamiliar),
+        number_parents_in_home: parseInt(formData.quantidadePessoas),
         full_phone: `${formData.ddi} ${formData.ddd ? `(${formData.ddd})` : ''} ${formData.celular}`,
-        courseId: id
-      });
+        course_id: id
+      };
 
-      // MOCK SUCCESS
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await api.post('/subscription/public', registrationData);
+
       setSubscriptionConfirm(true);
       toast.success('Inscrição enviada com sucesso!');
-    } catch (error) {
-      toast.error('Erro ao processar sua inscrição. Tente novamente.');
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || 'Erro ao processar sua inscrição. Tente novamente.';
+      toast.error(errorMessage);
       console.error(error);
     } finally {
       setLoading(false);
@@ -228,6 +303,12 @@ export default function RegistrationPage({ params }: { params: Promise<{ id: str
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    
+    if (name === 'cpf') {
+      setFormData(prev => ({ ...prev, [name]: applyCPFMask(value) }));
+      return;
+    }
+
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -279,7 +360,7 @@ export default function RegistrationPage({ params }: { params: Promise<{ id: str
                 <div className='space-y-3'>
                   <p className='font-bold text-2xl uppercase'>Inscrição Confirmada</p>
                   <motion.div className='w-auto h-[6.5rem]'
-                    initial={{rotateZ : "-0.15rad", y : 0}}
+                    initial={{rotateZ : "-0.25rad", y : 0}}
                     animate={{rotateZ: "0rad", y: 15 }}
                     exit={{rotateZ: "0rad", y: 0 }}
                     transition={{duration : 0.15, delay : 0.5}}
@@ -432,43 +513,41 @@ export default function RegistrationPage({ params }: { params: Promise<{ id: str
                         </PopoverContent>
                       </Popover>
 
-                      {formData.ddi === '+55' && (
-                        <Popover open={dddOpen} onOpenChange={setDddOpen}>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              role="combobox"
-                              aria-expanded={dddOpen}
-                              className="h-12 w-[80px] rounded-lg bg-slate-50 border-slate-300 justify-between px-3"
-                            >
-                              {formData.ddd || 'DDD'}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-[120px] p-0 rounded-lg border-slate-300" align="start">
-                            <Command className="rounded-lg">
-                              <CommandInput placeholder="DDD" />
-                              <CommandList>
-                                <CommandEmpty>?</CommandEmpty>
-                                <CommandGroup>
-                                  {ddds.map((item) => (
-                                    <CommandItem
-                                      key={item.value}
-                                      value={item.value}
-                                      onSelect={() => {
-                                        setFormData(prev => ({ ...prev, ddd: item.value }));
-                                        setDddOpen(false);
-                                      }}
-                                      className="cursor-pointer"
-                                    >
-                                      {item.label}
-                                    </CommandItem>
-                                  ))}
-                                </CommandGroup>
-                              </CommandList>
-                            </Command>
-                          </PopoverContent>
-                        </Popover>
-                      )}
+                      <Popover open={dddOpen} onOpenChange={setDddOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={dddOpen}
+                            className="h-12 w-[80px] rounded-lg bg-slate-50 border-slate-300 justify-between px-3"
+                          >
+                            {formData.ddd || 'DDD'}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[120px] p-0 rounded-lg border-slate-300" align="start">
+                          <Command className="rounded-lg">
+                            <CommandInput placeholder="DDD" />
+                            <CommandList>
+                              <CommandEmpty>?</CommandEmpty>
+                              <CommandGroup>
+                                {ddds.map((item) => (
+                                  <CommandItem
+                                    key={item.value}
+                                    value={item.value}
+                                    onSelect={() => {
+                                      setFormData(prev => ({ ...prev, ddd: item.value }));
+                                      setDddOpen(false);
+                                    }}
+                                    className="cursor-pointer"
+                                  >
+                                    {item.label}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
 
                       <div className="relative flex-1">
                         <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
@@ -481,7 +560,10 @@ export default function RegistrationPage({ params }: { params: Promise<{ id: str
                           onChange={(e) => {
                             const val = e.target.value.replace(/\D/g, '');
                             let masked = val;
-                            if (val.length > 5) masked = `${val.slice(0, 5)}-${val.slice(5, 9)}`;
+                            if (val.length > 4) {
+                              const split = val.length === 9 ? 5 : 4;
+                              masked = `${val.slice(0, split)}-${val.slice(split, split + 4)}`;
+                            }
                             setFormData(prev => ({ ...prev, celular: masked }));
                           }}
                           maxLength={10}
@@ -528,6 +610,40 @@ export default function RegistrationPage({ params }: { params: Promise<{ id: str
                       />
                     </div>
                   </div>
+
+                  {/* Renda Per Capita Display */}
+                  <AnimatePresence>
+                    {(formData.rendaFamiliar || formData.quantidadePessoas) && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="bg-primary/5 rounded-xl p-4 border border-primary/20 space-y-2"
+                      >
+                        <div className="flex justify-between items-center text-sm font-medium text-slate-600">
+                          <span className="flex items-center gap-2">
+                            <Wallet size={14} className="text-primary" />
+                            Renda Per Capita:
+                          </span>
+                          <span className={cn(
+                            "text-lg font-bold",
+                            rendaPerCapita > (SALARIO_MINIMO * 2) ? "text-red-500" : "text-primary"
+                          )}>
+                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(rendaPerCapita)}
+                          </span>
+                        </div>
+                        <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">
+                          Cálculo: Renda Familiar ÷ Pessoas {rendaPerCapita > (SALARIO_MINIMO * 2) ? "(Acima do limite PSG)" : "(Dentro do limite)"}
+                        </p>
+                        {rendaPerCapita > (SALARIO_MINIMO * 2) && (
+                          <div className="flex items-center gap-2 text-red-600 text-xs font-semibold mt-1">
+                            <X size={12} />
+                            <span>Limite PSG: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(SALARIO_MINIMO * 2)}</span>
+                          </div>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
 
                 <div className="pt-6 border-t border-slate-200">
@@ -607,6 +723,68 @@ export default function RegistrationPage({ params }: { params: Promise<{ id: str
         onAccept={handleAcceptCookie}
         policyText={policies.cookie.text}
       />
+
+      {/* MODAL DE ERRO: IDADE INSUFICIENTE */}
+      <Dialog open={isAgeErrorOpen} onOpenChange={setIsAgeErrorOpen}>
+        <DialogContent className="max-w-md rounded-lg p-0 overflow-hidden border border-red-200 bg-white shadow-2xl">
+          <div className="p-8 text-center space-y-6">
+            <div className="mx-auto w-20 h-20 rounded-full bg-red-100 flex items-center justify-center text-red-600 animate-pulse">
+              <X size={48} />
+            </div>
+            <div className="space-y-2">
+              <DialogTitle className="text-2xl font-bold text-slate-900">Idade Insuficiente</DialogTitle>
+              <DialogDescription className="text-slate-600">
+                Infelizmente você não possui a idade mínima necessária para este curso.
+              </DialogDescription>
+            </div>
+            <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 text-sm">
+              <p className="font-semibold text-slate-700">Requisito do Curso:</p>
+              <p className="text-slate-900 text-lg font-bold">{course?.minAge} anos</p>
+              <p className="font-semibold text-slate-700 mt-2">Sua Idade:</p>
+              <p className="text-red-600 text-lg font-bold">{calculateAge(formData.dataNascimento)} anos</p>
+            </div>
+            <Button 
+              onClick={() => setIsAgeErrorOpen(false)}
+              className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-lg"
+            >
+              OK, ENTENDI
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* MODAL DE ERRO: RENDA ACIMA DO LIMITE */}
+      <Dialog open={isIncomeErrorOpen} onOpenChange={setIsIncomeErrorOpen}>
+        <DialogContent className="max-w-md rounded-lg p-0 overflow-hidden border border-orange-200 bg-white shadow-2xl">
+          <div className="p-8 text-center space-y-6">
+            <div className="mx-auto w-20 h-20 rounded-full bg-orange-100 flex items-center justify-center text-orange-600">
+              <Wallet size={48} />
+            </div>
+            <div className="space-y-2">
+              <DialogTitle className="text-2xl font-bold text-slate-900">Renda Per Capita Excedida</DialogTitle>
+              <DialogDescription className="text-slate-600">
+                Sua renda per capita excede o limite permitido pelo Programa Senac de Gratuidade (PSG).
+              </DialogDescription>
+            </div>
+            <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 text-sm">
+              <p className="font-semibold text-slate-700">Sua Renda Per Capita:</p>
+              <p className="text-red-600 text-lg font-bold">
+                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(rendaPerCapita)}
+              </p>
+              <p className="font-semibold text-slate-700 mt-2">Limite Permitido (2 Salários Mínimos):</p>
+              <p className="text-slate-900 text-lg font-bold">
+                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(SALARIO_MINIMO * 2)}
+              </p>
+            </div>
+            <Button 
+              onClick={() => setIsIncomeErrorOpen(false)}
+              className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-lg"
+            >
+              OK, ENTENDI
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

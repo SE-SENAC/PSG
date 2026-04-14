@@ -19,46 +19,46 @@ export class Student {
   @Column()
   cpf: string;
 
-  @Column()
+  @Column({ nullable: true })
   gender: Gender;
 
   @Column()
   birth_date: Date;
 
-  @Column()
+  @Column({ nullable: true })
   is_pcd: IS_PCD;
 
-  @Column()
+  @Column({ nullable: true })
   pcd_type: PCD_TYPE;
 
-  @Column()
+  @Column({ nullable: true, type: 'decimal', precision: 10, scale: 2 })
   personal_income: number;
 
-  @Column()
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
   family_income: number;
 
   @Column()
   number_parents_in_home: number;
 
-  @Column()
+  @Column({ nullable: true })
   mother_name: string;
 
-  @Column()
+  @Column({ nullable: true })
   father_name: string;
 
-  @Column()
+  @Column({ nullable: true })
   educationLevel: EDUCATION_LEVEL;
 
-  @Column()
+  @Column({ nullable: true })
   institution: string;
 
-  @Column()
+  @Column({ nullable: true })
   course: string;
 
-  @Column()
+  @Column({ nullable: true })
   job_status: string;
 
-  @Column()
+  @Column({ nullable: true })
   where_study_secondary_school: string;
 
   @OneToOne(() => User, (user) => user.student, { onDelete: 'CASCADE' })

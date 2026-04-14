@@ -4,6 +4,7 @@ import {
   Post,
   Body,
   Patch,
+  Put,
   Param,
   Delete,
   Query,
@@ -37,6 +38,13 @@ export class SubscriptionController {
     );
   }
 
+  @Post('public')
+  @ApiOperation({ summary: 'Criar uma nova inscrição pública (Guest)' })
+  @ApiResponse({ status: 201, description: 'Inscrição pública realizada com sucesso' })
+  async publicCreate(@Body() data: any): Promise<Subscription> {
+    return this.subscriptionService.createPublic(data);
+  }
+
   @Post('confirm/:id')
   @ApiOperation({ summary: 'Confirmar uma inscrição' })
   @ApiParam({ name: 'id', description: 'ID da inscrição' })
@@ -64,6 +72,7 @@ export class SubscriptionController {
     return this.subscriptionService.findOne(id);
   }
 
+  @Put(':id')
   @Patch(':id')
   @ApiOperation({ summary: 'Atualizar uma inscrição' })
   @ApiParam({ name: 'id', description: 'ID da inscrição' })

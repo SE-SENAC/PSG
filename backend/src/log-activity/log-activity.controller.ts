@@ -30,9 +30,14 @@ export class LogActivityController {
     @Query('search') search?: string,
     @Query('method') method?: string,
     @Query('period') period?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
   ) {
     limit = limit > 100 ? 100 : limit;
-    return this.logActivityService.findAll({ page, limit, route: '/log-activity' }, { search, method, period });
+    return this.logActivityService.findAll(
+      { page, limit, route: '/log-activity' }, 
+      { search, method, period, startDate, endDate }
+    );
   }
 
   @Get(':id')

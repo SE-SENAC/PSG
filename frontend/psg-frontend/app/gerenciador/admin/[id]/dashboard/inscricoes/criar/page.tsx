@@ -45,7 +45,7 @@ export default function CreateSubscriptionPage() {
 
         setLoading(true);
         try {
-            await SubscriptionServices.create(formData);
+            await SubscriptionServices.create(formData.courseId, formData.studentId);
             toast.success("Inscrição criada com sucesso!");
             router.push(`/gerenciador/admin/${adminId}/dashboard/inscricoes`);
         } catch (err: any) {

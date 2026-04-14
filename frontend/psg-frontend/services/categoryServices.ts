@@ -12,6 +12,16 @@ export default class CategoryServices {
         }
     }
 
+    static async getById(id: string): Promise<any> {
+        try {
+            const response = await api.get(`${PATH}/${id}`);
+            return response.data;
+        } catch (e) {
+            throw e;
+        }
+    }
+
+
     static async create(data: any): Promise<any> {
         try {
             const response = await api.post(PATH, data);

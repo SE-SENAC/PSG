@@ -4,6 +4,7 @@ import {
   Post,
   Body,
   Patch,
+  Put,
   Param,
   Delete,
   Query,
@@ -60,6 +61,7 @@ export class CategoryController {
     return this.categoryService.findOne(id);
   }
 
+  @Put(':id')
   @Patch(':id')
   @ApiOperation({ summary: 'Atualizar uma categoria' })
   @ApiParam({ name: 'id', description: 'ID da categoria' })

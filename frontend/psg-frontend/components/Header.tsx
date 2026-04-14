@@ -151,7 +151,7 @@ export default function Header() {
 
               {/* Menu Desktop (Visível apenas no Desktop) */}
               <nav className="hidden lg:flex items-center gap-6 relative">
-                {mainLinks.map((link, idx) => {
+                {mainLinks.map((link: any, idx) => {
                   if (link.adminOnly && !isAdmin) return null;
 
                   if (link.subItems) {
@@ -177,7 +177,7 @@ export default function Header() {
                               className="absolute top-full left-0 bg-[#004587] shadow-xl w-[250px] overflow-hidden rounded-b-md"
                             >
                               <ul className="flex flex-col">
-                                  {link.subItems.map((sub, i) => (
+                                  {link.subItems.map((sub: any, i: number) => (
                                     <li key={i}>
                                       <Link
                                         href={getDynamicHref(sub.href)}
@@ -304,7 +304,7 @@ export default function Header() {
 
                   {/* Divisor */}
                   <div className="h-px w-full bg-white/20 my-1" />
-                  {mainLinks.map((link, idx) => {
+                  {mainLinks.map((link: any, idx) => {
                     if (link.adminOnly && !isAdmin) return null;
 
                     if (link.subItems) {
@@ -333,7 +333,7 @@ export default function Header() {
                                 className="overflow-hidden"
                               >
                                 <div className="pl-4 mt-4 flex flex-col gap-4 border-l-2 border-white/20">
-                                  {link.subItems.map((sub, i) => (
+                                  {link.subItems.map((sub: any, i: number) => (
                                     <Link
                                       key={i}
                                       href={getDynamicHref(sub.href)}

@@ -51,6 +51,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useState } from "react";
 
 export default function Layout({ children }: Readonly<{
     children: React.ReactNode;
@@ -71,6 +72,7 @@ export default function Layout({ children }: Readonly<{
         { nome: "Diretrizes", href: `/gerenciador/admin/${id}/dashboard/diretrizes`, icon: ClipboardList },
         { nome: "Edital", href: `/gerenciador/admin/${id}/dashboard/edital`, icon: FileText },
         { nome: "Resultados", href: `/gerenciador/admin/${id}/dashboard/resultados`, icon: ActivitySquare },
+        { nome: "Políticas e Regras", href: `/gerenciador/admin/${id}/dashboard/politicas`, icon: ShieldAlert },
     ];
 
     const handleLogout = () => {
@@ -78,13 +80,13 @@ export default function Layout({ children }: Readonly<{
         localStorage.removeItem("token");
         router.push("/gerenciador/admin/login");
     };
-
+ 
     return (
         <TooltipProvider delayDuration={0}>
             <SidebarProvider defaultOpen={true}>
                 <div className="flex min-h-screen w-full bg-slate-100 dark:bg-slate-950 font-sans antialiased text-slate-900 dark:text-white overflow-hidden transition-colors duration-500">
                     <Sidebar collapsible="icon" className="border-r border-slate-200 shadow-xl bg-[#002d5b] text-white transition-colors duration-500">
-                        <SidebarHeader className="h-24 flex items-start justify-center px-6 border-b border-[#004587] bg-[#00386d]">
+                        <SidebarHeader className={`h-24 flex items-start justify-center group-data-[collapsible=icon]:px-0 px-6 border-b border-[#004587] bg-[#00386d]`}>
                             <div className="flex items-center gap-4 overflow-hidden">
                                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#f58220] p-2 shadow-[#f58220]/20">
                                     <UserCircle className="text-white size-7" />
@@ -96,10 +98,10 @@ export default function Layout({ children }: Readonly<{
                             </div>
                         </SidebarHeader>
 
-                        <SidebarContent className="bg-slate-950 border-none custom-scrollbar">
+                        <SidebarContent className='bg-[#002d5b] border-none custom-scrollbar'>
                             <SidebarGroup>
                                 <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden px-6 text-slate-400 font-black text-[10px] uppercase tracking-[0.2em] mb-4 mt-6">Painel Administrativo</SidebarGroupLabel>
-                                <SidebarMenu className="px-3 space-y-1.5 font-medium">
+                                <SidebarMenu className={`px-0 space-y-1.5 font-medium`}>
                                     {sidebar_elems.map((item) => {
                                         const isDashboard = item.href === `/gerenciador/admin/${id}/dashboard`;
                                         const isActive = isDashboard
@@ -138,9 +140,9 @@ export default function Layout({ children }: Readonly<{
                             </SidebarGroup>
                         </SidebarContent>
 
-                        <SidebarFooter className="p-6 border-t border-slate-800 bg-slate-900">
+                        <SidebarFooter className="group-data-[collapsible=icon]:p-1 border-t border-slate-800 bg-[#00386d]">
                             <div className="flex items-center gap-4">
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
+                                <div className="group-data-[collapsible=icon]:hidden flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
                                     <User className="text-emerald-300" size={20} />
                                 </div>
                                 <div className="flex flex-col flex-1 overflow-hidden group-data-[collapsible=icon]:hidden">

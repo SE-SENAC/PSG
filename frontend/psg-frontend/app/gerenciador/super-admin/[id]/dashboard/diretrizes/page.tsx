@@ -110,7 +110,7 @@ export default function GuidelinesPage() {
                     <Button 
                         variant="outline" 
                         size="sm" 
-                        onClick={fetchGuidelines} 
+                        onClick={() => fetchGuidelines()} 
                         disabled={loading}
                         className="rounded-2xl border-slate-200 dark:border-slate-800 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-900 gap-2 h-11 px-4"
                     >

@@ -9,7 +9,7 @@ export class CreateLogActivityDto {
   page_route: string;
 
   @IsString()
-  action: string;
+  activity: string;
 
   @IsNumber()
   status: number;

@@ -42,7 +42,7 @@ export class AdminService {
     return this.userRepository.findOne({ where: { email: data.email } });
   }
 
-  async createAdminFromScratch(data: any) {
+  async createAdminFromScratch(data: CreateAdminDto) {
     const { name, email, password } = data;
 
     const existingUser = await this.userRepository.findOne({

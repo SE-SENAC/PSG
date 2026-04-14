@@ -1,6 +1,7 @@
 'use client';
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import { motion } from "framer-motion";
 import { BookOpen, FileText, Activity, Users, TrendingUp, ClipboardCheck, ArrowUpRight } from 'lucide-react';
@@ -20,7 +21,10 @@ export default function Dashboard() {
         cursosFuturos: 0,
         editais: 0,
         inscricoes: 0,
-        resultados: 0
+        resultados: 0,
+        inscricoesGrowth: 0,
+        taxaOcupacao: 0,
+        ativaPercent: 0
     });
 
     const [chartData, setChartData] = useState<any[]>([]);
@@ -31,7 +35,7 @@ export default function Dashboard() {
         async function fetchData() {
             try {
                 // Fetch counts for all states
-                const [totalRes, activeRes, inactiveRes, futureRes, extendedRes, editaisRes, subRes, resRes] = await Promise.all([
+                const [totalRes, activeRes, inactiveRes, futureRes, extendedRes, editaisRes, subRes, resRes, allCoursesRes] = await Promise.all([
                     CursosServices.getAll(1, 1),
                     CursosServices.filteredCourses({ status: 0, page: 1, limit: 1 }),
                     CursosServices.filteredCourses({ status: 1, page: 1, limit: 1 }),
@@ -39,8 +43,32 @@ export default function Dashboard() {
                     CursosServices.filteredCourses({ status: 3, page: 1, limit: 1 }),
                     EditalService.findAll(1, 1),
                     SubscriptionServices.getAll(),
-                    ResultsServices.findAll(1).catch(()=>null)
+                    ResultsServices.findAll(1).catch(()=>null),
+                    CursosServices.getAll(1, 100) // For occupancy calculation
                 ]);
+
+                // Calculate Subscription Growth
+                const subscriptionList = Array.isArray(subRes) ? subRes : [];
+                const now = new Date();
+                const thisMonth = now.getMonth();
+                const lastMonth = thisMonth === 0 ? 11 : thisMonth - 1;
+                
+                let subsThisMonth = 0;
+                let subsLastMonth = 0;
+
+                subscriptionList.forEach((sub: any) => {
+                    const date = new Date(sub.created_at || sub.createdAt);
+                    if (date.getMonth() === thisMonth && date.getFullYear() === now.getFullYear()) subsThisMonth++;
+                    if (date.getMonth() === lastMonth) subsLastMonth++;
+                });
+
+                const growth = subsLastMonth > 0 ? ((subsThisMonth - subsLastMonth) / subsLastMonth) * 100 : 0;
+
+                // Calculate Occupancy
+                const allCourses = allCoursesRes?.items || [];
+                const totalTargetPositions = allCourses.reduce((acc: number, c: any) => acc + (c.availablePosition || 0), 0);
+                const totalSubs = subscriptionList.length;
+                const occupancyRate = totalTargetPositions > 0 ? (totalSubs / totalTargetPositions) * 100 : 0;
 
                 setMetrics({
                     cursosTotal: totalRes?.meta?.totalItems || 0,
@@ -49,8 +77,11 @@ export default function Dashboard() {
                     cursosFuturos: futureRes?.meta?.totalItems || 0,
                     cursosProrrogados: extendedRes?.meta?.totalItems || 0,
                     editais: editaisRes?.meta?.totalItems || 0,
-                    inscricoes: Array.isArray(subRes) ? subRes.length : 0,
-                    resultados: resRes?.meta?.totalItems || (Array.isArray(resRes) ? resRes.length : 0)
+                    inscricoes: totalSubs,
+                    resultados: resRes?.meta?.totalItems || (Array.isArray(resRes) ? resRes.length : 0),
+                    inscricoesGrowth: growth,
+                    taxaOcupacao: occupancyRate,
+                    ativaPercent: totalRes?.meta?.totalItems > 0 ? (activeRes?.meta?.totalItems / totalRes?.meta?.totalItems) * 100 : 0
                 });
 
                 // Process chart data grouping subscriptions by month
@@ -61,7 +92,6 @@ export default function Dashboard() {
                     aprovações: 0
                 }));
 
-                const subscriptionList = Array.isArray(subRes) ? subRes : [];
                 subscriptionList.forEach((sub: any) => {
                     const dateRaw = sub.created_at || sub.createAt;
                     if (dateRaw) {
@@ -96,10 +126,42 @@ export default function Dashboard() {
     }, []);
 
     const cards = [
-        { title: "Cursos Totais", value: metrics.cursosTotal, icon: <BookOpen size={20} />, color: "text-blue-600", bg: "bg-blue-50" },
-        { title: "Cursos Ativos", value: metrics.cursosAtivos, icon: <Activity size={20} />, color: "text-emerald-600", bg: "bg-emerald-50" },
-        { title: "Inscrições", value: metrics.inscricoes, icon: <Users size={20} />, color: "text-purple-600", bg: "bg-purple-50" },
-        { title: "Editais", value: metrics.editais, icon: <FileText size={20} />, color: "text-orange-600", bg: "bg-orange-50" }
+        { 
+            title: "Cursos Totais", 
+            value: metrics.cursosTotal, 
+            icon: <BookOpen size={20} />, 
+            color: "text-blue-600", 
+            bg: "bg-blue-50",
+            percentage: "Saudável",
+            trend: "up"
+        },
+        { 
+            title: "Cursos Ativos", 
+            value: metrics.cursosAtivos, 
+            icon: <Activity size={20} />, 
+            color: "text-emerald-600", 
+            bg: "bg-emerald-50",
+            percentage: `${metrics.ativaPercent.toFixed(1)}%`,
+            trend: "up"
+        },
+        { 
+            title: "Inscrições", 
+            value: metrics.inscricoes, 
+            icon: <Users size={20} />, 
+            color: "text-purple-600", 
+            bg: "bg-purple-50",
+            percentage: metrics.inscricoesGrowth >= 0 ? `+${metrics.inscricoesGrowth.toFixed(1)}%` : `${metrics.inscricoesGrowth.toFixed(1)}%`,
+            trend: metrics.inscricoesGrowth >= 0 ? "up" : "down"
+        },
+        { 
+            title: "Taxa de Ocupação", 
+            value: `${metrics.taxaOcupacao.toFixed(1)}%`, 
+            icon: <TrendingUp size={20} />, 
+            color: "text-orange-600", 
+            bg: "bg-orange-50",
+            percentage: "Em alta",
+            trend: "up"
+        }
     ];
 
     if (!isMounted) return null;
@@ -124,8 +186,11 @@ export default function Dashboard() {
                             <div className={`p-2 rounded-xl ${c.bg} ${c.color} transition-colors group-hover:bg-opacity-80`}>
                                 {c.icon}
                             </div>
-                            <span className="text-xs font-medium text-emerald-600 flex items-center bg-emerald-50 px-2 py-1 rounded-full">
-                                <ArrowUpRight size={12} className="mr-1" /> +12%
+                            <span className={cn(
+                                "text-[10px] font-bold flex items-center px-2 py-1 rounded-full",
+                                c.trend === "up" ? "text-emerald-600 bg-emerald-50" : "text-rose-600 bg-rose-50"
+                            )}>
+                                {c.trend === "up" ? <ArrowUpRight size={10} className="mr-1" /> : <div className="size-2.5 mr-1 bg-rose-500 rounded-full" />} {c.percentage}
                             </span>
                         </div>
                         <div className="space-y-1">

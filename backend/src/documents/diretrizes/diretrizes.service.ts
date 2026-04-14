@@ -41,6 +41,10 @@ export class DiretrizesService {
     return await this.diretrizRepository.findOne({ where: { id } });
   }
 
+  async update(id: string, updateDiretrizDto: any) {
+    return await this.diretrizRepository.update(id, updateDiretrizDto);
+  }
+
   async remove(id: string) {
     return await this.diretrizRepository.delete(id);
   }

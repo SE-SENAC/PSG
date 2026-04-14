@@ -13,6 +13,12 @@ export class ConfigurationController {
     return this.configurationService.getAllPolicies();
   }
 
+  @Get('enrollment-rules')
+  @ApiOperation({ summary: 'Obter regras de inscrição do PSG' })
+  async getEnrollmentRules() {
+    return this.configurationService.getEnrollmentRules();
+  }
+
   @Post('upsert')
   @ApiOperation({ summary: 'Atualizar configuração (Apenas Super Admin)' })
   // @UseGuards(SuperAdminGuard) // Assuming you have an AuthGuard

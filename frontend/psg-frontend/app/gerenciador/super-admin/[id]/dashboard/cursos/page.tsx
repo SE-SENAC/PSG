@@ -122,7 +122,7 @@ export default function CoursesControlPage() {
                     <Button 
                         variant="outline" 
                         size="sm" 
-                        onClick={fetchCourses} 
+                        onClick={() => fetchCourses()} 
                         disabled={loading}
                         className="rounded-2xl border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 gap-2 h-11 px-4 text-[#004587] dark:text-white font-bold"
                     >
