@@ -32,6 +32,7 @@ import {
     Activity,
     Tags,
     ShieldAlert,
+    ShieldCheck,
     BarChart3,
     Crown,
     Sun,
@@ -75,6 +76,7 @@ export default function Layout({ children }: Readonly<{
         { nome: "Diretrizes", href: `/gerenciador/super-admin/${id}/dashboard/diretrizes`, icon: ClipboardList },
         { nome: "Edital", href: `/gerenciador/super-admin/${id}/dashboard/edital`, icon: FileText },
         { nome: "Resultados", href: `/gerenciador/super-admin/${id}/dashboard/resultados`, icon: ActivitySquare },
+        { nome: "Políticas", href: `/gerenciador/super-admin/${id}/dashboard/politicas`, icon: ShieldCheck },
         { nome: "Logs de Atividade", href: `/gerenciador/super-admin/${id}/dashboard/log-de-atividade`, icon: Activity },
     ];
 

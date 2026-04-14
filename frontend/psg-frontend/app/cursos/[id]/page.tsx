@@ -2,14 +2,14 @@
 
 import { useEffect, useState, use, useRef } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { 
-  GraduationCap, 
-  Clock, 
-  Users, 
-  MapPin, 
-  Calendar, 
-  Award, 
-  CheckCircle2, 
+import {
+  GraduationCap,
+  Clock,
+  Users,
+  MapPin,
+  Calendar,
+  Award,
+  CheckCircle2,
   ChevronLeft,
   ArrowRight,
   ShieldCheck,
@@ -91,7 +91,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
       a: 'A frequência mínima exigida é de 75%. Faltas não justificadas que ultrapassem esse limite podem resultar no desligamento do aluno e a vaga será redirecionada para outro candidato na lista de espera.'
     },
   ];
-  
+
   const headerOpacity = useTransform(scrollY, [0, 400], [1, 0.3]);
   const headerY = useTransform(scrollY, [0, 400], [0, 100]);
 
@@ -130,11 +130,11 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
     <div className="min-h-screen bg-background text-foreground transition-colors duration-500">
       {/* Cabeçalho Hero Imersivo */}
       <section className="relative h-[65vh] min-h-[500px] flex items-end pb-16 overflow-hidden">
-        <motion.div 
+        <motion.div
           style={{ opacity: headerOpacity, y: headerY }}
           className="absolute inset-0 z-0"
         >
-          <img 
+          <img
             src={course.img_url || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2000&auto=format&fit=crop"}
             className="w-full h-full object-cover"
             alt={course.title}
@@ -161,18 +161,18 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
               {course.title}
             </h1>
             <div className="flex flex-wrap gap-8 items-center text-muted-foreground font-bold text-sm uppercase tracking-wider">
-               <div className="flex items-center gap-2">
-                 <Clock size={18} className="text-primary" />
-                 <span>{course.workload}h Duração</span>
-               </div>
-               <div className="flex items-center gap-2">
-                 <Users size={18} className="text-secondary" />
-                 <span>{course.availablePosition} Vagas</span>
-               </div>
-               <div className="flex items-center gap-2">
-                 <ShieldCheck size={18} className="text-emerald-500" />
-                 <span>Inscrição Gratuita</span>
-               </div>
+              <div className="flex items-center gap-2">
+                <Clock size={18} className="text-primary" />
+                <span>{course.workload}h Duração</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Users size={18} className="text-secondary" />
+                <span>{course.availablePosition} Vagas</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <ShieldCheck size={18} className="text-emerald-500" />
+                <span>Inscrição Gratuita</span>
+              </div>
             </div>
           </motion.div>
         </div>
@@ -256,42 +256,44 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
           <aside className="lg:col-span-4 lg:sticky lg:top-32 h-fit space-y-6">
             <Card className="p-8 border-border bg-card rounded-[40px] shadow-2xl relative overflow-hidden group">
               <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary to-secondary" />
-              
+
               <h3 className="text-3xl font-black mb-10 italic tracking-tighter uppercase">Fazer Inscrição</h3>
 
               <div className="space-y-8 mb-10">
                 <div className="flex gap-4 items-start">
-                   <Calendar className="text-primary mt-1" size={20} />
-                   <div>
-                     <p className="text-[10px] font-bold uppercase opacity-40 tracking-widest">Cronograma das Aulas</p>
-                     <p className="text-sm font-bold mt-1">
-                       {new Date(course.courseStart).toLocaleDateString('pt-BR')} até {new Date(course.courseEnd).toLocaleDateString('pt-BR')}
-                     </p>
-                   </div>
+                  <Calendar className="text-primary mt-1" size={20} />
+                  <div>
+                    <p className="text-[10px] font-bold uppercase opacity-40 tracking-widest">Cronograma das Aulas</p>
+                    <p className="text-sm font-bold mt-1">
+                      {new Date(course.courseStart).toLocaleDateString('pt-BR')} até {new Date(course.courseEnd).toLocaleDateString('pt-BR')}
+                    </p>
+                  </div>
                 </div>
 
                 <div className="flex gap-4 items-start">
-                   <Clock className="text-primary mt-1" size={20} />
-                   <div>
-                     <p className="text-[10px] font-bold uppercase opacity-40 tracking-widest">Horário e Frequência</p>
-                     <p className="text-sm font-bold mt-1 leading-snug">{course.schooldays}</p>
-                   </div>
+                  <Clock className="text-primary mt-1" size={20} />
+                  <div>
+                    <p className="text-[10px] font-bold uppercase opacity-40 tracking-widest">Horário e Frequência</p>
+                    <p className="text-sm font-bold mt-1 leading-snug">{course.schooldays}</p>
+                  </div>
                 </div>
 
                 <div className="flex gap-4 items-start">
-                   <MapPin className="text-primary mt-1" size={20} />
-                   <div>
-                     <p className="text-[10px] font-bold uppercase opacity-40 tracking-widest">Onde Estudar?</p>
-                     <p className="text-sm font-bold mt-1 leading-snug">{course.address}</p>
-                   </div>
+                  <MapPin className="text-primary mt-1" size={20} />
+                  <div>
+                    <p className="text-[10px] font-bold uppercase opacity-40 tracking-widest">Onde Estudar?</p>
+                    <p className="text-sm font-bold mt-1 leading-snug">{course.address}</p>
+                  </div>
                 </div>
               </div>
 
-              <Button className="w-full h-16 bg-primary text-white font-black text-lg rounded-2xl shadow-xl shadow-primary/20 transition-all hover:scale-[1.03] active:scale-[0.97] group">
-                INSCREVER-SE
-                <ArrowRight className="ml-2 transition-transform group-hover:translate-x-1" size={20} />
-              </Button>
-              
+              <Link href={`/cursos/${id}/inscricao`}>
+                <Button className="w-full h-16 bg-primary text-white font-black text-lg rounded-2xl shadow-xl shadow-primary/20 transition-all hover:scale-[1.03] active:scale-[0.97] group">
+                  INSCREVER-SE
+                  <ArrowRight className="ml-2 transition-transform group-hover:translate-x-1" size={20} />
+                </Button>
+              </Link>
+
               <p className="mt-6 text-center text-[10px] font-bold opacity-30 uppercase tracking-widest">
                 Processo Seletivo Gratuito (PSG)
               </p>
@@ -351,17 +353,15 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
                       {faqs.map((faq, i) => (
                         <div
                           key={i}
-                          className={`border rounded-2xl overflow-hidden transition-all duration-300 ${
-                            openFaq === i ? 'border-primary/30 bg-primary/[0.03]' : 'border-border hover:border-border/80'
-                          }`}
+                          className={`border rounded-2xl overflow-hidden transition-all duration-300 ${openFaq === i ? 'border-primary/30 bg-primary/[0.03]' : 'border-border hover:border-border/80'
+                            }`}
                         >
                           <button
                             onClick={() => setOpenFaq(openFaq === i ? null : i)}
                             className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left"
                           >
-                            <span className={`text-sm font-bold leading-snug transition-colors ${
-                              openFaq === i ? 'text-primary' : 'text-foreground'
-                            }`}>
+                            <span className={`text-sm font-bold leading-snug transition-colors ${openFaq === i ? 'text-primary' : 'text-foreground'
+                              }`}>
                               {faq.q}
                             </span>
                             <motion.div

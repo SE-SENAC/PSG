@@ -31,6 +31,7 @@ import { LogActivityModule } from './log-activity/log-activity.module';
 import { DiretrizesModule } from './documents/diretrizes/diretrizes.module';
 import { SuperAdminSeed } from '../seed';
 import { LogActivityMiddleware } from './log-activity/log-activity.middleware';
+import { ConfigurationModule } from './configuration/configuration.module';
 
 @Module({
   imports: [
@@ -109,6 +110,7 @@ import { LogActivityMiddleware } from './log-activity/log-activity.middleware';
     SigApiConsumerModule,
     LogActivityModule,
     DiretrizesModule,
+    ConfigurationModule,
   ],
   controllers: [AppController],
   providers: [
