@@ -20,7 +20,10 @@ export class DiretrizesService {
     return await this.diretrizRepository.save(createDiretrizDto);
   }
 
-  async findAll(options: IPaginationOptions, search?: string): Promise<Pagination<Diretriz>> {
+  async findAll(
+    options: IPaginationOptions,
+    search?: string,
+  ): Promise<Pagination<Diretriz>> {
     const queryBuilder = this.diretrizRepository.createQueryBuilder('diretriz');
 
     // Filtrar apenas diretrizes ativas

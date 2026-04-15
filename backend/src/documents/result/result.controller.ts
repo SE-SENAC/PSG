@@ -45,7 +45,10 @@ export class ResultController {
     @Query('search') search?: string,
   ) {
     limit = limit > 100 ? 100 : limit;
-    return this.resultService.findAll({ page, limit, route: '/result' }, search);
+    return this.resultService.findAll(
+      { page, limit, route: '/result' },
+      search,
+    );
   }
 
   @Get(':id')

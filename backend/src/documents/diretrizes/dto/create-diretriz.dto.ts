@@ -2,7 +2,10 @@ import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateDiretrizDto {
-  @ApiProperty({ example: 'Diretrizes 2026', description: 'Título da diretriz' })
+  @ApiProperty({
+    example: 'Diretrizes 2026',
+    description: 'Título da diretriz',
+  })
   @IsNotEmpty()
   @IsString()
   title: string;

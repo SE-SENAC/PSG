@@ -42,8 +42,8 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: process.env.CORS_ORIGINS 
-      ? process.env.CORS_ORIGINS.split(',') 
+    origin: process.env.CORS_ORIGINS
+      ? process.env.CORS_ORIGINS.split(',')
       : true, // Se não especificado, permite todos em desenvolvimento
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,

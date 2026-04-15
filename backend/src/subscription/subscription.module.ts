@@ -10,7 +10,16 @@ import { Course } from 'src/course/entities/course.entity';
 import { Configuration } from 'src/configuration/entities/configuration.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Subscription, User, Student, TypeUser, Course, Configuration])],
+  imports: [
+    TypeOrmModule.forFeature([
+      Subscription,
+      User,
+      Student,
+      TypeUser,
+      Course,
+      Configuration,
+    ]),
+  ],
   controllers: [SubscriptionController],
   providers: [SubscriptionService],
 })

@@ -35,8 +35,8 @@ export class LogActivityController {
   ) {
     limit = limit > 100 ? 100 : limit;
     return this.logActivityService.findAll(
-      { page, limit, route: '/log-activity' }, 
-      { search, method, period, startDate, endDate }
+      { page, limit, route: '/log-activity' },
+      { search, method, period, startDate, endDate },
     );
   }
 

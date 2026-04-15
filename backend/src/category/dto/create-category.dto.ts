@@ -2,7 +2,11 @@ import { IsBoolean, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCategoryDto {
-  @ApiProperty({ example: '3c59dc04-8e88-5024-3be8-079a5c74d079', description: 'ID da categoria', required: false })
+  @ApiProperty({
+    example: '3c59dc04-8e88-5024-3be8-079a5c74d079',
+    description: 'ID da categoria',
+    required: false,
+  })
   @IsString()
   @IsOptional()
   id?: string;

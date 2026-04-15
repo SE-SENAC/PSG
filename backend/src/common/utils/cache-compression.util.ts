@@ -9,7 +9,7 @@ const gunzip = promisify(zlib.gunzip);
 export class CacheCompressionHelper {
   static async compress(value: any): Promise<string | any> {
     if (value === undefined || value === null) return value;
-    
+
     try {
       const stringified = JSON.stringify(value);
       const buffer = await gzip(Buffer.from(stringified));

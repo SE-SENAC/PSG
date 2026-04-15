@@ -1,4 +1,9 @@
-import { Module, NestModule, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
+import {
+  Module,
+  NestModule,
+  MiddlewareConsumer,
+  RequestMethod,
+} from '@nestjs/common';
 import { LogActivityService } from './log-activity.service';
 import { LogActivityController } from './log-activity.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';

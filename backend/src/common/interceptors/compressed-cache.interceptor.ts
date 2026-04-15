@@ -10,7 +10,10 @@ const gunzip = promisify(zlib.gunzip);
 
 @Injectable()
 export class CompressedCacheInterceptor extends CacheInterceptor {
-  async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
+  async intercept(
+    context: ExecutionContext,
+    next: CallHandler,
+  ): Promise<Observable<any>> {
     const key = this.trackBy(context);
     if (!key) {
       return next.handle();

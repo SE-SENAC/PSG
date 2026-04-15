@@ -27,22 +27,23 @@ export class AllExceptionsFilter implements ExceptionFilter {
     } else if (exception instanceof QueryFailedError) {
       status = HttpStatus.BAD_REQUEST;
       const errorCode = (exception as any).code;
-      
+
       // Mapeamento de erros comuns do drive de banco (SQL Server / PostgreSQL / etc)
       switch (errorCode) {
         case '23505': // PostgreSQL Unique Violation
-        case '2627':  // SQL Server Unique Constraint
-        case '2601':  // SQL Server Unique Index
+        case '2627': // SQL Server Unique Constraint
+        case '2601': // SQL Server Unique Index
           message = 'Registro duplicado. Este dado já existe no sistema.';
           break;
         case '23503': // PostgreSQL Foreign Key Violation
-        case '547':   // SQL Server Foreign Key Violation
-          message = 'Não é possível realizar esta ação pois este registro está sendo usado em outro lugar.';
+        case '547': // SQL Server Foreign Key Violation
+          message =
+            'Não é possível realizar esta ação pois este registro está sendo usado em outro lugar.';
           break;
         default:
           message = 'Erro ao processar dados no banco de dados.';
       }
-      
+
       this.logger.warn(`Database Error: ${errorCode} - ${exception.message}`);
     } else {
       this.logger.error(
@@ -51,10 +52,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
       );
     }
 
-    const errorDetails = typeof message === 'string' ? { message } : (message as object);
+    const errorDetails = typeof message === 'string' ? { message } : message;
 
     response.status(status).json({
-      ...(typeof errorDetails === 'object' ? errorDetails : { message: errorDetails }),
+      ...(typeof errorDetails === 'object'
+        ? errorDetails
+        : { message: errorDetails }),
       statusCode: status,
       timestamp: new Date().toISOString(),
       path: request.url,

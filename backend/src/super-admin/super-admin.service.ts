@@ -142,7 +142,10 @@ export class SuperAdminService {
     return this.userRepository.update(userId, { isActive: status });
   }
 
-  async listAdmins(options: IPaginationOptions, search?: string): Promise<Pagination<User>> {
+  async listAdmins(
+    options: IPaginationOptions,
+    search?: string,
+  ): Promise<Pagination<User>> {
     const queryBuilder = this.userRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.typeUser', 'typeUser')
@@ -152,7 +155,7 @@ export class SuperAdminService {
     if (search) {
       queryBuilder.andWhere(
         '(user.name LIKE :search OR user.email LIKE :search)',
-        { search: `%${search}%` }
+        { search: `%${search}%` },
       );
     }
 

@@ -13,19 +13,21 @@ export class LogActivityMiddleware implements NestMiddleware {
 
   use(req: Request, res: Response, next: NextFunction) {
     const { ip, method, url } = req;
-    
+
     // We'll create the log after the request is finished to capture the correct status code
     res.on('finish', () => {
       const user = (req as any).user;
-      
-      this.logActivityRepository.save({
-        ip: ip,
-        status: res.statusCode,
-        method: method,
-        page_route: url,
-        userId: user ? user.id : null,
-        activity: this.formatActivity(method, url),
-      }).catch(err => console.error('Error saving log activity:', err));
+
+      this.logActivityRepository
+        .save({
+          ip: ip,
+          status: res.statusCode,
+          method: method,
+          page_route: url,
+          userId: user ? user.id : null,
+          activity: this.formatActivity(method, url),
+        })
+        .catch((err) => console.error('Error saving log activity:', err));
     });
 
     next();
@@ -35,11 +37,11 @@ export class LogActivityMiddleware implements NestMiddleware {
     const path = url.split('?')[0];
     const segments = path.split('/').filter(Boolean);
     const actions: { [key: string]: string } = {
-      'GET': 'Visualizou',
-      'POST': 'Criou/Processou',
-      'PUT': 'Atualizou',
-      'PATCH': 'Modificou',
-      'DELETE': 'Removeu'
+      GET: 'Visualizou',
+      POST: 'Criou/Processou',
+      PUT: 'Atualizou',
+      PATCH: 'Modificou',
+      DELETE: 'Removeu',
     };
 
     const verb = actions[method] || 'Acessou';
@@ -57,7 +59,9 @@ export class LogActivityMiddleware implements NestMiddleware {
 
     if (resource === 'auth') {
       const actionSegment = segments[0];
-      if (['login', 'login-admin', 'login-super-admin'].includes(actionSegment)) {
+      if (
+        ['login', 'login-admin', 'login-super-admin'].includes(actionSegment)
+      ) {
         return 'a autenticação do usuário';
       }
       if (actionSegment === 'logout') {
@@ -97,22 +101,22 @@ export class LogActivityMiddleware implements NestMiddleware {
 
   private humanizeResource(resource: string): string {
     const labels: { [key: string]: string } = {
-      'address': 'endereço',
-      'admin': 'administrador',
-      'auth': 'autenticação',
-      'category': 'categoria',
-      'course': 'curso',
-      'configuration': 'configuração',
-      'diretrizes': 'diretrizes',
-      'edital': 'edital',
-      'phone': 'telefone',
-      'student': 'aluno',
-      'subscription': 'inscrição',
+      address: 'endereço',
+      admin: 'administrador',
+      auth: 'autenticação',
+      category: 'categoria',
+      course: 'curso',
+      configuration: 'configuração',
+      diretrizes: 'diretrizes',
+      edital: 'edital',
+      phone: 'telefone',
+      student: 'aluno',
+      subscription: 'inscrição',
       'super-admin': 'super-administrador',
       'type-user': 'tipo de usuário',
-      'user': 'usuário',
+      user: 'usuário',
       'sig-api-consumer': 'consumidor SIG',
-      'results': 'resultados',
+      results: 'resultados',
     };
 
     return labels[resource] || resource.replace(/-/g, ' ');

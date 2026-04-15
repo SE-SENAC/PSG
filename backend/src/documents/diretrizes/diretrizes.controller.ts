@@ -14,7 +14,13 @@ import {
 import { DiretrizesService } from './diretrizes.service';
 import { CreateDiretrizDto } from './dto/create-diretriz.dto';
 import { UpdateDiretrizDto } from './dto/update-diretriz.dto';
-import { ApiTags, ApiOperation, ApiQuery, ApiParam, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiQuery,
+  ApiParam,
+  ApiResponse,
+} from '@nestjs/swagger';
 
 @ApiTags('diretrizes')
 @Controller('diretrizes')
@@ -37,7 +43,10 @@ export class DiretrizesController {
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number = 10,
     @Query('search') search?: string,
   ) {
-    return this.diretrizesService.findAll({ page, limit, route: '/diretrizes' }, search);
+    return this.diretrizesService.findAll(
+      { page, limit, route: '/diretrizes' },
+      search,
+    );
   }
 
   @Get(':id')
@@ -51,7 +60,10 @@ export class DiretrizesController {
   @ApiOperation({ summary: 'Atualizar uma diretriz' })
   @ApiParam({ name: 'id', description: 'ID da diretriz' })
   @ApiResponse({ status: 200, description: 'Diretriz atualizada com sucesso' })
-  update(@Param('id') id: string, @Body() updateDiretrizDto: UpdateDiretrizDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateDiretrizDto: UpdateDiretrizDto,
+  ) {
     return this.diretrizesService.update(id, updateDiretrizDto);
   }
 

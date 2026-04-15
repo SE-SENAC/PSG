@@ -37,7 +37,7 @@ export class SubscriptionService {
     private readonly courseRepository: Repository<Course>,
     @InjectRepository(Configuration)
     private readonly configurationRepository: Repository<Configuration>,
-  ) { }
+  ) {}
 
   async confirm(id: string): Promise<Subscription> {
     const subscription = await this.subscriptionRepository.findOne({
@@ -75,18 +75,28 @@ export class SubscriptionService {
   }
 
   async createPublic(data: any): Promise<Subscription> {
-    const { name, email, cpf, birth_date, family_income, number_parents_in_home, course_id } = data;
+    const {
+      name,
+      email,
+      cpf,
+      birth_date,
+      family_income,
+      number_parents_in_home,
+      course_id,
+    } = data;
 
     // 1. Check if course exists
-    const course = await this.courseRepository.findOne({ where: { id: course_id } });
+    const course = await this.courseRepository.findOne({
+      where: { id: course_id },
+    });
     if (!course) {
       throw new NotFoundException('Curso não encontrado');
     }
 
     // 2. Find or Create User/Student
-    let student = await this.studentRepository.findOne({ 
+    let student = await this.studentRepository.findOne({
       where: { cpf },
-      relations: ['user']
+      relations: ['user'],
     });
 
     let user: User | null = null;
@@ -96,36 +106,42 @@ export class SubscriptionService {
       user = await this.userRepository.findOne({ where: { email } });
       if (!user) {
         // Create skeleton user
-        let typeUser = await this.typeUserRepository.findOne({ where: { role: ROLE.CLIENT } });
+        let typeUser = await this.typeUserRepository.findOne({
+          where: { role: ROLE.CLIENT },
+        });
         if (!typeUser) {
           typeUser = await this.typeUserRepository.save({ role: ROLE.CLIENT });
         }
 
         const hashedPassword = await bcrypt.hash(cpf.replace(/\D/g, ''), 10); // Default password is CPF
 
-        user = await this.userRepository.save(this.userRepository.create({
-          name,
-          email,
-          password: hashedPassword,
-          typeUser,
-          isActive: true
-        }));
+        user = await this.userRepository.save(
+          this.userRepository.create({
+            name,
+            email,
+            password: hashedPassword,
+            typeUser,
+            isActive: true,
+          }),
+        );
       }
 
       // Create student
-      student = (await this.studentRepository.save(this.studentRepository.create({
-        cpf,
-        birth_date: new Date(birth_date),
-        family_income,
-        number_parents_in_home,
-        user: user!,
-      } as any))) as unknown as Student;
+      student = (await this.studentRepository.save(
+        this.studentRepository.create({
+          cpf,
+          birth_date: new Date(birth_date),
+          family_income,
+          number_parents_in_home,
+          user: user,
+        } as any),
+      )) as unknown as Student;
     } else {
       user = student.user;
     }
 
     if (!user) {
-        throw new BadRequestException('Erro ao processar usuário para inscrição');
+      throw new BadRequestException('Erro ao processar usuário para inscrição');
     }
 
     // 3. Check Enrollment Rules
@@ -135,7 +151,7 @@ export class SubscriptionService {
     const subscription = this.subscriptionRepository.create({
       user,
       course,
-      status: STATUS.PENDING
+      status: STATUS.PENDING,
     });
 
     return await this.subscriptionRepository.save(subscription);
@@ -143,8 +159,12 @@ export class SubscriptionService {
 
   private async checkEnrollmentRules(userId: string, targetCourseId: string) {
     // Fetch rules from DB
-    const maxCoursesConfig = await this.configurationRepository.findOne({ where: { key: 'psg_max_courses' } });
-    const allowSameShiftConfig = await this.configurationRepository.findOne({ where: { key: 'psg_allow_same_shift' } });
+    const maxCoursesConfig = await this.configurationRepository.findOne({
+      where: { key: 'psg_max_courses' },
+    });
+    const allowSameShiftConfig = await this.configurationRepository.findOne({
+      where: { key: 'psg_allow_same_shift' },
+    });
 
     const maxCourses = parseInt(maxCoursesConfig?.value || '2');
     const allowSameShift = allowSameShiftConfig?.value === 'true';
@@ -152,37 +172,51 @@ export class SubscriptionService {
     // Existing subscriptions
     const existingSubscriptions = await this.subscriptionRepository.find({
       where: { user: { id: userId } },
-      relations: ['course']
+      relations: ['course'],
     });
 
     // Check if already subscribed to this course
-    const alreadySubscribed = existingSubscriptions.find(s => s.course.id === targetCourseId);
+    const alreadySubscribed = existingSubscriptions.find(
+      (s) => s.course.id === targetCourseId,
+    );
     if (alreadySubscribed) {
       throw new BadRequestException('Você já possui uma inscrição neste curso');
     }
 
     // Check max courses
     if (existingSubscriptions.length >= maxCourses) {
-      throw new BadRequestException(`Limite de inscrições atingido (${maxCourses} cursos)`);
+      throw new BadRequestException(
+        `Limite de inscrições atingido (${maxCourses} cursos)`,
+      );
     }
 
     // Check shift conflicts
     if (!allowSameShift && existingSubscriptions.length > 0) {
-      const targetCourse = await this.courseRepository.findOne({ where: { id: targetCourseId } });
+      const targetCourse = await this.courseRepository.findOne({
+        where: { id: targetCourseId },
+      });
       if (!targetCourse) {
         throw new NotFoundException('Curso alvo não encontrado');
       }
-      
-      const sameShift = existingSubscriptions.find(s => s.course.period_day === targetCourse.period_day);
-      
+
+      const sameShift = existingSubscriptions.find(
+        (s) => s.course.period_day === targetCourse.period_day,
+      );
+
       if (sameShift) {
-        throw new BadRequestException(`Conflito de horário: você já possui uma inscrição no turno ${targetCourse.period_day}`);
+        throw new BadRequestException(
+          `Conflito de horário: você já possui uma inscrição no turno ${targetCourse.period_day}`,
+        );
       }
     }
   }
 
-  async findAll(options: IPaginationOptions, search?: string): Promise<Pagination<Subscription>> {
-    const queryBuilder = this.subscriptionRepository.createQueryBuilder('subscription')
+  async findAll(
+    options: IPaginationOptions,
+    search?: string,
+  ): Promise<Pagination<Subscription>> {
+    const queryBuilder = this.subscriptionRepository
+      .createQueryBuilder('subscription')
       .leftJoinAndSelect('subscription.user', 'user')
       .leftJoinAndSelect('user.student', 'student')
       .leftJoinAndSelect('subscription.course', 'course');
@@ -190,7 +224,7 @@ export class SubscriptionService {
     if (search) {
       queryBuilder.where(
         '(user.name LIKE :search OR course.title LIKE :search OR student.cpf LIKE :search)',
-        { search: `%${search}%` }
+        { search: `%${search}%` },
       );
     }
 

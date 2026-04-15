@@ -20,17 +20,23 @@ export class ResultService {
     return await this.resultRepository.save(createResultDto);
   }
 
-  async findAll(option: IPaginationOptions, search?: string): Promise<Pagination<Result>> {
+  async findAll(
+    option: IPaginationOptions,
+    search?: string,
+  ): Promise<Pagination<Result>> {
     const queryBuilder = this.resultRepository.createQueryBuilder('result');
-    
+
     if (search) {
-      queryBuilder.where('result.title LIKE :search OR result.code LIKE :search', { 
-        search: `%${search}%` 
-      });
+      queryBuilder.where(
+        'result.title LIKE :search OR result.code LIKE :search',
+        {
+          search: `%${search}%`,
+        },
+      );
     }
-    
+
     queryBuilder.orderBy('result.title', 'ASC');
-    
+
     return await paginate<Result>(queryBuilder, option);
   }
 

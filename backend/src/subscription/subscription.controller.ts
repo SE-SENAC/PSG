@@ -40,7 +40,10 @@ export class SubscriptionController {
 
   @Post('public')
   @ApiOperation({ summary: 'Criar uma nova inscrição pública (Guest)' })
-  @ApiResponse({ status: 201, description: 'Inscrição pública realizada com sucesso' })
+  @ApiResponse({
+    status: 201,
+    description: 'Inscrição pública realizada com sucesso',
+  })
   async publicCreate(@Body() data: any): Promise<Subscription> {
     return this.subscriptionService.createPublic(data);
   }
@@ -61,7 +64,10 @@ export class SubscriptionController {
     @Query('search') search?: string,
   ) {
     limit = limit > 100 ? 100 : limit;
-    return this.subscriptionService.findAll({ page, limit, route: '/subscription' }, search);
+    return this.subscriptionService.findAll(
+      { page, limit, route: '/subscription' },
+      search,
+    );
   }
 
   @Get(':id')

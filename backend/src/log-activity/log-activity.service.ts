@@ -22,27 +22,30 @@ export class LogActivityService {
   }
 
   async findAll(
-    options: IPaginationOptions, 
-    filters: { 
-      search?: string; 
-      method?: string; 
+    options: IPaginationOptions,
+    filters: {
+      search?: string;
+      method?: string;
       period?: string;
       startDate?: string;
       endDate?: string;
-    }
+    },
   ): Promise<Pagination<LogActivity>> {
-    const queryBuilder = this.logActivityRepository.createQueryBuilder('log')
+    const queryBuilder = this.logActivityRepository
+      .createQueryBuilder('log')
       .leftJoinAndSelect('log.user', 'user');
 
     if (filters.search) {
       queryBuilder.andWhere(
         '(log.activity LIKE :search OR user.name LIKE :search OR user.email LIKE :search OR log.ip LIKE :search OR log.page_route LIKE :search)',
-        { search: `%${filters.search}%` }
+        { search: `%${filters.search}%` },
       );
     }
 
     if (filters.method && filters.method !== 'all') {
-      queryBuilder.andWhere('log.method = :method', { method: filters.method.toUpperCase() });
+      queryBuilder.andWhere('log.method = :method', {
+        method: filters.method.toUpperCase(),
+      });
     }
 
     // Date Range filtering (Calendar)
@@ -62,7 +65,7 @@ export class LogActivityService {
     if (filters.period && filters.period !== 'all' && !filters.startDate) {
       const now = new Date();
       let periodStart: Date | null = null;
-      
+
       switch (filters.period) {
         case 'today':
         case '24h':
@@ -77,9 +80,11 @@ export class LogActivityService {
           periodStart = new Date(now.setMonth(now.getMonth() - 1));
           break;
       }
-      
+
       if (periodStart) {
-        queryBuilder.andWhere('log.created_at >= :periodStart', { periodStart });
+        queryBuilder.andWhere('log.created_at >= :periodStart', {
+          periodStart,
+        });
       }
     }
 
@@ -89,9 +94,9 @@ export class LogActivityService {
   }
 
   findOne(id: string) {
-    return this.logActivityRepository.findOne({ 
+    return this.logActivityRepository.findOne({
       where: { id },
-      relations: ['user']
+      relations: ['user'],
     });
   }
 

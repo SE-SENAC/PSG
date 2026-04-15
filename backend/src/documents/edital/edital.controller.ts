@@ -45,7 +45,10 @@ export class EditalController {
     @Query('search') search?: string,
   ) {
     limit = limit > 100 ? 100 : limit;
-    return this.editalService.findAll({ page, limit, route: '/edital' }, search);
+    return this.editalService.findAll(
+      { page, limit, route: '/edital' },
+      search,
+    );
   }
 
   @Get(':id')

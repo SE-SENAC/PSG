@@ -31,7 +31,9 @@ export class CreateCourseDto {
   @IsString()
   address: string;
 
-  @ApiProperty({ description: 'Telefones e outros campos podem ser adicionados' })
+  @ApiProperty({
+    description: 'Telefones e outros campos podem ser adicionados',
+  })
   @IsOptional()
   @IsString()
   municipality: string;
